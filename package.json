@@ -1,0 +1,59 @@
+{
+  "name": "gatsby-plugin-prismic-preview",
+  "version": "1.0.0",
+  "description": "Enable previews for gatsby-source-prismic",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src --out-dir ./ --extensions '.ts,.tsx'",
+    "prepare": "cross-env NODE_ENV=production npm run build",
+    "watch": "babel -w src --out-dir ./"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/birkir/gatsby-plugin-prismic-preview.git"
+  },
+  "files": [
+    "gatsby-browser.js",
+    "gatsby-node.js",
+    "Preview.js",
+    "PrismicPreviewWrapper.js",
+    "index.js"
+  ],
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "prismic",
+    "preview"
+  ],
+  "author": "Birkir Gudjonsson <birkir.gudjonsson@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/birkir/gatsby-plugin-prismic-preview/issues"
+  },
+  "homepage": "https://github.com/birkir/gatsby-plugin-prismic-preview#readme",
+  "peerDependencies": {
+    "gatsby": ">2.0.0-alpha"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.1.2",
+    "@babel/core": "7.1.2",
+    "@babel/plugin-proposal-class-properties": "7.1.0",
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0",
+    "@babel/plugin-transform-runtime": "7.1.0",
+    "@babel/preset-env": "7.1.0",
+    "@babel/preset-react": "7.0.0",
+    "@babel/preset-typescript": "7.1.0",
+    "@babel/runtime": "7.1.2",
+    "@types/lodash": "4.14.117",
+    "@types/node": "10.12.0",
+    "@types/react": "16.4.18",
+    "@types/traverse": "0.6.32",
+    "cross-env": "5.2.0"
+  },
+  "dependencies": {
+    "lodash": "4.17.11",
+    "prismic-javascript": "1.5.0",
+    "react": "^16.5.2",
+    "traverse": "0.6.6"
+  }
+}
