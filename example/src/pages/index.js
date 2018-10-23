@@ -1,12 +1,8 @@
 import React from 'react'
-import { Link, graphql } from 'gatsby'
-
+import { Link } from 'gatsby'
 import Layout from '../components/layout'
 
 class IndexPage extends React.Component {
-  componentDidMount() {
-    console.log('IndexPage', this);
-  }
   render() {
     return (
       <Layout>
@@ -18,15 +14,5 @@ class IndexPage extends React.Component {
     );
   }
 }
-
-export const query = graphql`
-  query OtherQuery {
-    site {
-      siteMetadata {
-        title
-      }
-    }
-  }
-`;
 
 export default IndexPage

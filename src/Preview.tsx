@@ -19,14 +19,20 @@ export default class PreviewPage extends React.Component<any> {
   }
 
   get linkResolver() {
-    return new Function(this.props.pageContext.linkResolver)();
+    try {
+      const resolver = new Function(`return ${this.props.pageContext.linkResolver}`)();
+      resolver(null);
+      return resolver;
+    } catch (err) {
+      return () => '/';
+    }
   }
 
   public async preview() {
     const token = this.url.searchParams.get('token');
     const documentId = this.url.searchParams.get('documentId');
 
-    if (!token || !documentId) return;
+    if (!token) return;
 
     const api = await Prismic.getApi(`https://${this.repositoryName}.cdn.prismic.io/api/v2`);
     await api.previewSession(token, this.linkResolver, '/');
@@ -34,6 +40,10 @@ export default class PreviewPage extends React.Component<any> {
     const now = new Date();
     now.setHours(now.getHours() + 1);
     document.cookie = `${Prismic.previewCookie}=${token}; expires=${now.toUTCString()}; path=/`;
+
+    if (!documentId) {
+      return this.redirect(null);
+    }
 
     // Find published document
     let doc = await api.getByID(documentId, { ref: api.master() });
@@ -63,7 +73,7 @@ export default class PreviewPage extends React.Component<any> {
     }
   }
 
-  public redirect(doc: any): void {
+  public redirect = (doc: any): void => {
     const to = new URL(this.url.toString());
     const pathname = this.linkResolver(doc);
     to.pathname = pathname.replace(/\/*$/, '') + '/';

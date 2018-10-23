@@ -1,6 +1,6 @@
 {
   "name": "gatsby-plugin-prismic-preview",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Enable previews for gatsby-source-prismic",
   "main": "index.js",
   "scripts": {

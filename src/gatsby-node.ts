@@ -28,8 +28,8 @@ export const createPages = ({ actions }: CreatePage, options: PluginOptions) => 
     path: previewPath.replace(/^\//, ''),
     component: path.resolve(path.join(__dirname, 'Preview.js')),
     context: {
-      ...options,
-      linkResolver: options.linkResolver.toString(),
+      repositoryName: options.repositoryName,
+      linkResolver: (options.linkResolver || '').toString(),
     }
   });
 };
