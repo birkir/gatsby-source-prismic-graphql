@@ -1,6 +1,2 @@
 node_modules
-
-/Preview.js
-/PrismicPreviewWrapper.js
-/gatsby-node.js
-/gatsby-browser.js
+/*.js

@@ -1,16 +1,15 @@
 {
-  "name": "gatsby-plugin-prismic-preview",
-  "version": "2.0.0",
-  "description": "Enable previews for gatsby-source-prismic",
+  "name": "gatsby-source-prismic-graphql",
+  "version": "0.2.0",
+  "description": "Prismic source for Gatsby GraphQL endpoint",
   "main": "index.js",
   "scripts": {
-    "build": "babel src --out-dir ./ --extensions '.ts,.tsx'",
-    "prepare": "cross-env NODE_ENV=production npm run build",
-    "watch": "babel -w src --out-dir ./"
+    "build": "rm -rf ./*.js && babel src --out-dir ./ --extensions '.ts,.tsx'",
+    "prepare": "cross-env NODE_ENV=production npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/birkir/gatsby-plugin-prismic-preview.git"
+    "url": "git+https://github.com/birkir/gatsby-source-prismic-graphql.git"
   },
   "files": [
     "gatsby-browser.js",
@@ -23,14 +22,15 @@
     "gatsby",
     "gatsby-plugin",
     "prismic",
+    "graphql",
     "preview"
   ],
   "author": "Birkir Gudjonsson <birkir.gudjonsson@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/birkir/gatsby-plugin-prismic-preview/issues"
+    "url": "https://github.com/birkir/gatsby-source-prismic-graphql/issues"
   },
-  "homepage": "https://github.com/birkir/gatsby-plugin-prismic-preview#readme",
+  "homepage": "https://github.com/birkir/gatsby-source-prismic-graphql#readme",
   "peerDependencies": {
     "gatsby": ">2.0.0-alpha"
   },
@@ -44,16 +44,13 @@
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.1.0",
     "@babel/runtime": "7.1.2",
-    "@types/lodash": "4.14.117",
     "@types/node": "10.12.0",
     "@types/react": "16.4.18",
-    "@types/traverse": "0.6.32",
     "cross-env": "5.2.0"
   },
   "dependencies": {
-    "lodash": "4.17.11",
-    "prismic-javascript": "1.5.0",
-    "react": "^16.5.2",
-    "traverse": "0.6.6"
+    "apollo-link-context": "^1.0.12",
+    "gatsby-source-graphql-universal": "^2.0.0",
+    "prismic-javascript": "^2.0.1"
   }
 }

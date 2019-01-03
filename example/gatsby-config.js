@@ -7,8 +7,8 @@ module.exports = {
     {
       resolve: 'gatsby-source-prismic',
       options: {
-        repositoryName: 'gatsby-source-prismic-test-site',
-        accessToken: 'example-wou7evoh0eexuf6chooz2jai2qui9pae4tieph1sei4deiboj',
+        repositoryName: 'ueno-starter-kit-universally-test',
+        // accessToken: 'example-wou7evoh0eexuf6chooz2jai2qui9pae4tieph1sei4deiboj',
         linkResolver: ({ node, key, value }) => require('./src/linkResolver'),
       }
     },
@@ -16,7 +16,7 @@ module.exports = {
       resolve: 'gatsby-plugin-prismic-preview',
       options: {
         path: '/preview',
-        repositoryName: 'gatsby-source-prismic-test-site',
+        repositoryName: 'ueno-starter-kit-universally-test',
         linkResolver: require('./src/linkResolver'),
       }
     },

@@ -1,8 +1,8 @@
 import React from 'react';
-import PrismicPreviewWrapper from './PrismicPreviewWrapper';
+import { withPreview } from './withPreview';
 
 interface WrapPageArgs {
-  element: React.ReactNode;
+  element: React.ComponentType<any>;
   props: any;
 }
 
@@ -11,12 +11,5 @@ interface PluginOptions {
 }
 
 export const wrapPageElement = ({ element, props }: WrapPageArgs, options: PluginOptions) => {
-  return (
-    <PrismicPreviewWrapper
-      {...props}
-      repositoryName={options.repositoryName}
-    >
-      {element}
-    </PrismicPreviewWrapper>
-  )
+  return withPreview(element, { repositoryName: options.repositoryName });
 }

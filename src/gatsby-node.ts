@@ -1,3 +1,4 @@
+import { sourceNodes, onCreateWebpackConfig } from 'gatsby-source-graphql-universal/gatsby-node';
 import path from 'path';
 
 interface CreatePageInput {
@@ -16,17 +17,25 @@ interface CreatePage {
 
 interface PluginOptions {
   repositoryName: string;
-  path?: string;
+  path?: null | string;
   linkResolver(doc: any): void;
 }
 
-export const createPages = ({ actions }: CreatePage, options: PluginOptions) => {
+exports.sourceNodes = sourceNodes;
+
+exports.onCreateWebpackConfig = onCreateWebpackConfig;
+
+exports.createPages = ({ actions }: CreatePage, options: PluginOptions) => {
+
+  if (options.path === null) {
+    return;
+  }
 
   const previewPath = (options.path || '/preview');
 
   actions.createPage({
     path: previewPath.replace(/^\//, ''),
-    component: path.resolve(path.join(__dirname, 'Preview.js')),
+    component: path.resolve(path.join(__dirname, 'PreviewPage.js')),
     context: {
       repositoryName: options.repositoryName,
       linkResolver: (options.linkResolver || '').toString(),

@@ -1,6 +1,24 @@
 import React from 'react'
-import { Link } from 'gatsby'
+import { Link, graphql } from 'gatsby'
 import Layout from '../components/layout'
+
+export const query = graphql`
+  query {
+    allPrismicArticle {
+      edges {
+        node {
+          id
+          data {
+            title {
+              html
+              text
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 class IndexPage extends React.Component {
   render() {
@@ -15,4 +33,6 @@ class IndexPage extends React.Component {
   }
 }
 
-export default IndexPage
+IndexPage.query = query;
+
+export default IndexPage;
