@@ -12,11 +12,8 @@
     "url": "git+https://github.com/birkir/gatsby-source-prismic-graphql.git"
   },
   "files": [
-    "gatsby-browser.js",
-    "gatsby-node.js",
-    "Preview.js",
-    "PrismicPreviewWrapper.js",
-    "index.js"
+    "*.js",
+    "src"
   ],
   "keywords": [
     "gatsby",
