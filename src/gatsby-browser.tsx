@@ -2,7 +2,7 @@ import React from 'react';
 import { withPreview } from './withPreview';
 
 interface WrapPageArgs {
-  element: React.ComponentType<any>;
+  element: any; // React.ComponentType<any>;
   props: any;
 }
 
@@ -11,5 +11,6 @@ interface PluginOptions {
 }
 
 export const wrapPageElement = ({ element, props }: WrapPageArgs, options: PluginOptions) => {
-  return withPreview(element, { repositoryName: options.repositoryName });
+  const Preview = withPreview(undefined, options);
+  return <Preview {...props}>{element}</Preview>;
 }

@@ -1,3 +1,5 @@
+const { linkResolver } = require('./src/utils/linkResolver');
+
 module.exports = {
   siteMetadata: {
     title: 'Gatsby Prismic Preview Example',
@@ -5,19 +7,10 @@ module.exports = {
   plugins: [
     'gatsby-plugin-react-helmet',
     {
-      resolve: 'gatsby-source-prismic',
+      resolve: 'gatsby-source-prismic-graphql',
       options: {
         repositoryName: 'ueno-starter-kit-universally-test',
-        // accessToken: 'example-wou7evoh0eexuf6chooz2jai2qui9pae4tieph1sei4deiboj',
-        linkResolver: ({ node, key, value }) => require('./src/linkResolver'),
-      }
-    },
-    {
-      resolve: 'gatsby-plugin-prismic-preview',
-      options: {
-        path: '/preview',
-        repositoryName: 'ueno-starter-kit-universally-test',
-        linkResolver: require('./src/linkResolver'),
+        linkResolver,
       }
     },
     {

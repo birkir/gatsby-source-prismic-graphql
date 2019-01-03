@@ -7,6 +7,7 @@ import { PrismicLink, getCookies, fieldName, typeName } from './utils';
 import gql from 'graphql-tag';
 
 interface IPreviewProps {
+  children?: any;
   data: any;
   loadPreview?(query?: IGatsbyQuery): void
 }
@@ -36,20 +37,20 @@ const getClient = (name: string) => {
 }
 
 export function withPreview<P extends object>(
-  ComposedComponent: React.ComponentType<P | IPreviewProps>,
+  ComposedComponent?: React.ComponentType<P | IPreviewProps>,
   { repositoryName, query }: { repositoryName?: string; query?: IGatsbyQuery } = {}
 ) {
   let repoName = repositoryName || '';
   let querySource = query && query.source;
 
   if (typeof window !== 'undefined' && !repoName) {
-    const registry = (window as any).___graphqlUniversal;
-    if (registry.prismic && registry.prismic.url) {
-      repoName = registry.prismic.url.replace(/https:\/\//, '').split('.')[0];
+    const registry = (window as any).___sourcePrismicGraphql;
+    if (registry.repositoryName) {
+      repoName = registry.repositoryName;
     }
   }
 
-  const compQuery = (ComposedComponent as any).query;
+  const compQuery = ComposedComponent && (ComposedComponent as any).query;
 
   if (!querySource && compQuery && compQuery.source) {
     querySource = compQuery.source;
@@ -62,19 +63,22 @@ export function withPreview<P extends object>(
     }
 
     componentDidMount() {
-      this.setup()
-    }
-
-    setup = () => {
       if (typeof window !== 'undefined' && document.cookie) {
         const cookies = getCookies();
-        if (querySource && (cookies.has(Prismic.experimentCookie) || cookies.has(Prismic.previewCookie))) {
+        if (cookies.has(Prismic.experimentCookie) || cookies.has(Prismic.previewCookie)) {
           this.loadPreview();
         }
       }
     }
 
     loadPreview = async (proposedQuery?: IGatsbyQuery, proposedRepoName?: string) => {
+      const { children } = this.props;
+      const query = (children && children.type && children.type.query) || null;
+
+      if (query && query.source) {
+        querySource = query.source;
+      }
+
       if (proposedQuery && proposedQuery.source) {
         querySource = proposedQuery.source;
       }
@@ -86,26 +90,38 @@ export function withPreview<P extends object>(
 
       const client = getClient(proposedRepoName || repoName);
 
-      const res = await client.query({
-        query: getIsolatedQuery(gql(querySource), fieldName, typeName),
-        fetchPolicy: 'network-only',
-      });
-
-      if (!res.errors && res.data) {
-        const rootValue = (this.state.data && this.state.data[fieldName]) || {};
-        this.setState({
-          data: {
-            ...this.state.data,
-            [fieldName]: {
-              ...rootValue,
-              ...res.data,
-            },
-          },
+      try {
+        const res = await client.query({
+          query: getIsolatedQuery(gql(querySource), fieldName, typeName),
+          fetchPolicy: 'network-only',
         });
+
+        if (!res.errors && res.data) {
+          const rootValue = (this.state.data && this.state.data[fieldName]) || {};
+          this.setState({
+            data: {
+              ...this.state.data,
+              [fieldName]: {
+                ...rootValue,
+                ...res.data,
+              },
+            },
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch preview', err);
       }
     }
 
     render() {
+      if (!ComposedComponent) {
+        return React.cloneElement(this.props.children, {
+          ...this.props,
+          loadPreview: this.loadPreview,
+          data: this.state.data,
+        });
+      }
+
       return (
         <ComposedComponent
           {...this.props}

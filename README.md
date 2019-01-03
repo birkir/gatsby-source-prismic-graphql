@@ -1,86 +1,37 @@
-# Prismic preview
+# gatsby-source-prismic-graphql
 
-Enable previews of your prismic documents
+Source data from prismic via the GraphQL API
 
 ## Installing
 
 Install module
 
 ```bash
-npm install --save gatsby-plugin-prismic-preview
+npm install --save gatsby-source-prismic-graphql
 ```
 
 Add plugin to `gatsby-config.js`:
 
 ```js
 {
-  resolve: 'gatsby-plugin-prismic-preview',
+  resolve: 'gatsby-source-prismic-graphql',
   options: {
-    repositoryName: 'gatsby-source-prismic-test-site',
-    linkResolver: require('./src/linkResolver'),
-    path: '/preview',
+    repositoryName: 'gatsby-source-prismic-test-site', // (required)
+    linkResolver(doc) { return '/' }, // Must be a pure function with no references
+    accessToken: '...', // (optional)
+    path: '/preview', // (optional)
+    previews: true, // (optional, default: true)
   }
 }
 ```
 
-## Configuration
+### Options
 
-### `repositoryName`
-
-Should be the same as the one in gatsby-source-prismic plugin
-
-### `linkResolver`
-
-Inline function
-
-```js
-options: {
-  linkResolver(doc) {
-    if (doc.type === 'BlogPost') {
-      return `/blog/${doc.uid}`;
-    }
-    return `${doc.type}`;
-  },
-},
-```
-
-or a require to a specific file (must be ES5 `module.exports` format)
-
-```js
-options: {
-  linkResolver: require('./src/utils/linkResolver'),
-},
-```
-
-### path
-
-Where the preview page should live.
-
-Defaults to `/preview`.
-
-## Staging environment
-
-Only allow previews on staging? In `gatsby-config.js` do a conditional operation:
-
-```js
-const plugins = [
-  'plugin-1',
-  'plugin-2',
-];
-
-if (process.env.NODE_ENV === 'staging') {
-  plugins.push({
-    resolve: 'gatsby-plugin-prismic-preview',
-    options: {}
-  });
-}
-
-module.exports = {
-  siteMetadata: {
-    title: 'Gatsby Default Starter',
-  },
-  plugins,
-};
-```
+ * repositoryName - Your prismic repo name
+ * linkResolver - function to resolve URL
+ * path - where to put the preview page
+ * previews - weither to enable previews or not
 
 ## Troubleshooting
+
+Todo

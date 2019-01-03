@@ -22,8 +22,25 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: 
     <script
       key={`plugin-source-prismic-graphql`}
       dangerouslySetInnerHTML={{
-        __html: `window.___sourcePrismicGraphql = ${JSON.stringify({ repositoryName, accessToken, previews, linkResolver: (linkResolver || '').toString(), })}; `
+        __html: `window.___sourcePrismicGraphql = ${JSON.stringify({ repositoryName, accessToken, previews })}; `
       }}
     />
   ]);
+
+  if (previews) {
+    setHeadComponents([
+      <script
+        key="prismic-config"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.prismic = {
+              endpoint: 'https://${repositoryName}.prismic.io/api/v2'
+            };
+          `
+        }}
+      />,
+      <script key="prismic-script" type="text/javascript" src="//static.cdn.prismic.io/prismic.min.js" />
+    ]);
+  }
+
 }

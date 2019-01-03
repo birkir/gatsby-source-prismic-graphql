@@ -2,6 +2,12 @@ import React from 'react';
 import Prismic from 'prismic-javascript';
 import { parseQuery } from './utils';
 
+interface IVariation {
+  id: string;
+  label: string;
+  ref: string;
+};
+
 export class PreviewPage extends React.Component<any> {
 
   public url: URL | undefined;
@@ -14,7 +20,7 @@ export class PreviewPage extends React.Component<any> {
   setup() {
     if (typeof window !== 'undefined') {
       this.url = new URL(window.location.toString());
-      this.qs = parseQuery(this.url.search);
+      this.qs = parseQuery(String(this.url.search).substr(1));
       this.preview();
     }
   }
@@ -28,15 +34,12 @@ export class PreviewPage extends React.Component<any> {
   }
 
   get repositoryName() {
-    if (this.props.pageContext.repositoryName) {
-      return ;
-    }
     return this.props.pageContext.repositoryName || this.config.repositoryName;
   }
 
   get linkResolver() {
     try {
-      const linkResolver = this.props.pageContext.linkResolver || this.config.linkResolver;
+      const linkResolver = this.props.linkResolver || this.props.pageContext.linkResolver || this.config.linkResolver;
       const resolver = new Function(`return ${linkResolver}`)();
       resolver(null);
       return resolver;
@@ -46,59 +49,50 @@ export class PreviewPage extends React.Component<any> {
   }
 
   public async preview() {
+    const experiment = this.qs.get('experiment');
     const token = this.qs.get('token');
     const documentId = this.qs.get('documentId');
 
-    if (!token) return;
-
-    const api = await Prismic.getApi(`https://${this.repositoryName}.cdn.prismic.io/api/v2`);
-    await api.previewSession(token, this.linkResolver, '/');
-
     const now = new Date();
     now.setHours(now.getHours() + 1);
-    document.cookie = `${Prismic.previewCookie}=${token}; expires=${now.toUTCString()}; path=/`;
 
-    // @todo support experiments
+    const api = await Prismic.getApi(`https://${this.repositoryName}.cdn.prismic.io/api/v2`);
 
-    if (!documentId) {
-      return this.redirect(null);
+    if (token) {
+      await api.previewSession(token, this.linkResolver, '/');
+      document.cookie = `${Prismic.previewCookie}=${token}; expires=${now.toUTCString()}; path=/`;
+
+      if (!documentId) {
+        return this.redirect();
+      }
+
+      const doc = await api.getByID(documentId);
+
+      return this.redirect(doc);
+    } else if (experiment) {
+      const runningVariations: IVariation[] = [];
+
+      if (api.experiments.running && api.experiments.running.length) {
+        runningVariations.concat(...api.experiments.running.map(experiment => experiment.data.variations));
+      }
+
+      if (experiment && runningVariations.length) {
+        const matchedVariation = runningVariations
+          .find(variation => variation.label.toLowerCase().replace(' ', '-') === experiment);
+
+        if (matchedVariation) {
+          document.cookie = `${Prismic.experimentCookie}=${matchedVariation.ref}; expires=${now.toUTCString()}; path=/`;
+          this.redirect();
+        }
+      }
     }
-
-    const doc = await api.getByID(documentId);
-    return this.redirect(doc);
-
-  //   // Find published document
-  //   let doc = await api.getByID(documentId, { ref: api.master() });
-
-  //   if (!doc || (doc && !doc.first_publication_date)) {
-  //     const { type } = await api.getByID(documentId);
-  //     const latestOfPublishedType = await api.query(
-  //       Prismic.Predicates.at('document.type', type),
-  //       {
-  //         orderings: '[document.first_publication_date desc]',
-  //         pageSize: 1,
-  //       },
-  //     );
-
-  //     if (latestOfPublishedType && latestOfPublishedType.results.length) {
-  //       doc = get(latestOfPublishedType, 'results.0');
-  //       if (doc) {
-  //         this.url.searchParams.set('targetId', doc.id);
-  //       }
-  //     }
-  //   }
-
-  //   if (doc) {
-  //     this.redirect(doc);
-  //   } else {
-  //     alert('Error: Did not find any published document of this type to use as a placeholder');
-  //   }
   }
 
-  public redirect = (doc: any): void => {
+  public redirect = (doc?: any): void => {
     const to = new URL(this.url && this.url.toString() || '');
-    const pathname = this.linkResolver(doc);
+    const pathname = doc ? this.linkResolver(doc) : '/';
     to.pathname = pathname.replace(/\/*$/, '') + '/';
+    to.search = '';
     (window as any).location = to;
   }
 

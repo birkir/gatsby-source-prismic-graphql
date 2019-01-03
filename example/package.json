@@ -7,9 +7,8 @@
     "gatsby": "^2.0.0",
     "gatsby-plugin-manifest": "^2.0.2",
     "gatsby-plugin-offline": "^2.0.5",
-    "gatsby-plugin-prismic-preview": "^1.0.2",
     "gatsby-plugin-react-helmet": "^3.0.0",
-    "gatsby-source-prismic": "^2.0.0",
+    "gatsby-source-prismic-graphql": "0.2.9",
     "react": "^16.5.1",
     "react-dom": "^16.5.1",
     "react-helmet": "^5.2.0"
