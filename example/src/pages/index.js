@@ -1,12 +1,13 @@
 import React from 'react'
 import { Link, graphql } from 'gatsby'
 import Layout from '../components/layout'
-// import { withPreview } from 'gatsby-source-prismic-graphql/withPreview';
 
 export const query = graphql`
   query {
     prismic {
-      allArticles {
+      allArticles(
+        uid_in: ["the-wordpress-question"]
+      ) {
         edges {
           node {
             title
@@ -17,25 +18,20 @@ export const query = graphql`
   }
 `;
 
-class IndexPage extends React.Component {
+export default class IndexPage extends React.Component {
 
   static query = query;
 
-  componentDidMount() {
-    console.log('IndexPage.props', this.props);
-  }
-
   render() {
+    const [edge] = this.props.data.prismic.allArticles.edges;
+    const [title] = edge ? edge.node.title : [];
     return (
       <Layout>
-        <h1>Hi people</h1>
-        {console.log('data', this.props.data)}
+        <h1>{title && title.text}</h1>
         <p>Welcome to your new Gatsby site.</p>
         <p>Now go build something great.</p>
-        <Link to="/page-2/">Go to page 2</Link>
+        <Link to="/article/">Go to page 2</Link>
       </Layout>
     );
   }
 }
-
-export default IndexPage;

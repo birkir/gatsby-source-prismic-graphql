@@ -19,17 +19,17 @@ interface CreatePage {
 interface PluginOptions {
   repositoryName: string;
   path?: null | string;
-  linkResolver(doc: any): void;
 }
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
-exports.sourceNodes = (ref: any, options: { [key: string]: any; repositoryName: string }) => {
+exports.sourceNodes = (ref: any, options: { [key: string]: any; accessToken?: string; repositoryName: string }) => {
   options.fieldName = fieldName;
   options.typeName = typeName;
   options.createLink = () => PrismicLink({
     uri: `https://${options.repositoryName}.prismic.io/graphql`,
     credentials: 'same-origin',
+    accessToken: options.accessToken,
   });
 
   return sourceNodes(ref, options);
@@ -44,7 +44,6 @@ exports.createPages = ({ actions }: CreatePage, options: PluginOptions) => {
     component: path.resolve(path.join(__dirname, 'PreviewPage.js')),
     context: {
       repositoryName: options.repositoryName,
-      linkResolver: (options.linkResolver || '').toString(),
     }
   });
 };

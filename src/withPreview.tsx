@@ -3,17 +3,23 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-boost';
 import Prismic from 'prismic-javascript';
 import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
+import { merge } from 'lodash';
 import { PrismicLink, getCookies, fieldName, typeName } from './utils';
-import gql from 'graphql-tag';
 
 interface IPreviewProps {
   children?: any;
   data: any;
-  loadPreview?(query?: IGatsbyQuery): void
+  prismic: {
+    loading: boolean;
+    error: any;
+    load(variables?: { [key: string]: any }): void;
+  };
 }
 
 interface IPreviewState {
   data: any;
+  error: any;
+  loading: boolean;
 }
 
 interface IGatsbyQuery {
@@ -21,114 +27,97 @@ interface IGatsbyQuery {
   source: string;
 }
 
-const clients = new Map();
+let client: ApolloClient<any> | undefined = undefined;
 
-const getClient = (name: string) => {
-  if (!clients.has(name)) {
-    clients.set(name, new ApolloClient({
+const getClient = (): ApolloClient<any> => {
+  if (!client) {
+    let repositoryName: string = '';
+    if (typeof window !== 'undefined') {
+      const registry = (window as any).___sourcePrismicGraphql;
+      if (registry.repositoryName) {
+        repositoryName = registry.repositoryName;
+      }
+    }
+    client = new ApolloClient({
       cache: new InMemoryCache(),
       link: PrismicLink({
-        uri: `https://${name}.prismic.io/graphql`,
-        credentials: 'same-origin',
-      }),
-    }));
+        uri: `https://${repositoryName}.prismic.io/graphql`,
+        credentials: 'same-origin'
+      })
+    });
   }
-  return clients.get(name);
-}
+  return client;
+};
 
 export function withPreview<P extends object>(
-  ComposedComponent?: React.ComponentType<P | IPreviewProps>,
-  { repositoryName, query }: { repositoryName?: string; query?: IGatsbyQuery } = {}
+  ComposedComponent?: React.ComponentType<P | IPreviewProps> & { query: any },
+  query?: IGatsbyQuery
 ) {
-  let repoName = repositoryName || '';
-  let querySource = query && query.source;
-
-  if (typeof window !== 'undefined' && !repoName) {
-    const registry = (window as any).___sourcePrismicGraphql;
-    if (registry.repositoryName) {
-      repoName = registry.repositoryName;
-    }
-  }
-
-  const compQuery = ComposedComponent && (ComposedComponent as any).query;
-
-  if (!querySource && compQuery && compQuery.source) {
-    querySource = compQuery.source;
-  }
-
   return class extends React.Component<IPreviewProps, IPreviewState> {
-
     state = {
-      data: this.props.data
-    }
+      // proxy data to state
+      data: this.props.data,
+      loading: false,
+      error: null
+    };
 
     componentDidMount() {
       if (typeof window !== 'undefined' && document.cookie) {
         const cookies = getCookies();
-        if (cookies.has(Prismic.experimentCookie) || cookies.has(Prismic.previewCookie)) {
-          this.loadPreview();
+        if (
+          cookies.has(Prismic.experimentCookie) ||
+          cookies.has(Prismic.previewCookie)
+        ) {
+          this.load();
         }
       }
     }
 
-    loadPreview = async (proposedQuery?: IGatsbyQuery, proposedRepoName?: string) => {
-      const { children } = this.props;
-      const query = (children && children.type && children.type.query) || null;
-
-      if (query && query.source) {
-        querySource = query.source;
-      }
-
-      if (proposedQuery && proposedQuery.source) {
-        querySource = proposedQuery.source;
-      }
-
-      if (!querySource) {
-        console.warn('gatsby-source-prismic-graphql: Did not find query source. You can set with `this.props.setQuery(query)`.');
-        return;
-      }
-
-      const client = getClient(proposedRepoName || repoName);
-
+    load = async (variables?: { [key: string]: string }) => {
+      const client = getClient();
       try {
+        this.setState({ loading: true, error: false });
         const res = await client.query({
-          query: getIsolatedQuery(gql(querySource), fieldName, typeName),
+          query: getIsolatedQuery(query, fieldName, typeName),
           fetchPolicy: 'network-only',
+          variables
         });
 
         if (!res.errors && res.data) {
-          const rootValue = (this.state.data && this.state.data[fieldName]) || {};
           this.setState({
-            data: {
-              ...this.state.data,
-              [fieldName]: {
-                ...rootValue,
-                ...res.data,
-              },
-            },
+            loading: false,
+            data: merge(this.state.data, { [fieldName]: res.data })
           });
+        } else {
+          this.setState({ error: res.errors, loading: false });
         }
       } catch (err) {
         console.error('Failed to fetch preview', err);
       }
-    }
+    };
 
     render() {
+      const prismic = {
+        loading: this.state.loading,
+        error: this.state.error,
+        load: this.load
+      };
+
       if (!ComposedComponent) {
         return React.cloneElement(this.props.children, {
           ...this.props,
-          loadPreview: this.loadPreview,
-          data: this.state.data,
+          prismic,
+          data: this.state.data
         });
       }
 
       return (
         <ComposedComponent
           {...this.props}
-          loadPreview={this.loadPreview}
+          prismic={prismic}
           data={this.state.data}
         />
       );
     }
-  }
+  };
 }

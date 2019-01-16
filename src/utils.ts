@@ -9,24 +9,38 @@ interface IPrismicLinkArgs extends HttpOptions {
   useGETForQueries?: boolean;
 }
 
+// @todo should this be configurable?
 export const fieldName = 'prismic';
 export const typeName = 'PRISMIC';
 
-export function parseQuery(qs = '', delimiter = '&') {
+// keep link resolver function
+export let linkResolver: (doc: any) => string;
+export let componentResolver: (doc: any) => React.Component;
+
+export function qs(qs: string = '', delimiter: string = '&'): Map<string, string> {
   return new Map(
-    qs.split(delimiter).map(item =>
-      item
-        .split('=')
-        .map(part => decodeURIComponent(part.trim()))
-        .slice(0, 2) as [string, string]
-    )
+    qs.split(delimiter).map((item) => {
+      const [key, value] = item.split('=').map((part) => decodeURIComponent(part.trim()))
+      return [key, value] as [string, string];
+    })
   );
 }
 
-export function getCookies() {
-  return parseQuery(document.cookie, ';');
+export function registerResolvers(link: typeof linkResolver, component?: typeof componentResolver) {
+  linkResolver = link;
+  if (component) {
+    componentResolver = component;
+  }
 }
 
+export function getCookies() {
+  return qs(document.cookie, ';');
+}
+
+/**
+ * Apollo Link for Prismic
+ * @param options Options
+ */
 export function PrismicLink({ uri, accessToken, ...rest }: IPrismicLinkArgs) {
   const BaseURIReg = /^(https?:\/\/.+?\..+?\..+?)\/graphql\/?$/;
   const matches = uri.match(BaseURIReg);

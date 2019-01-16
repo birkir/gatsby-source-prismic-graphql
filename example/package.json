@@ -1,14 +1,14 @@
 {
-  "name": "gatsby-starter-default",
-  "description": "Gatsby default starter",
+  "name": "gatsby-source-prismic-graphql-example",
+  "description": "Prismic GraphQL Example",
   "version": "1.0.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
+  "author": "Birkir Gudjonsson <birkir.gudjonsson@gmail.com>",
   "dependencies": {
     "gatsby": "^2.0.0",
     "gatsby-plugin-manifest": "^2.0.2",
     "gatsby-plugin-offline": "^2.0.5",
     "gatsby-plugin-react-helmet": "^3.0.0",
-    "gatsby-source-prismic-graphql": "0.2.9",
+    "gatsby-source-prismic-graphql": "./..",
     "react": "^16.5.1",
     "react-dom": "^16.5.1",
     "react-helmet": "^5.2.0"
@@ -25,6 +25,9 @@
   },
   "devDependencies": {
     "prettier": "^1.14.2"
+  },
+  "resolutions": {
+    "graphql": "0.13.2"
   },
   "repository": {
     "type": "git",

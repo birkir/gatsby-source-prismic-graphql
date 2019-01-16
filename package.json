@@ -1,11 +1,12 @@
 {
   "name": "gatsby-source-prismic-graphql",
   "version": "2.0.0",
-  "description": "Prismic source for Gatsby GraphQL endpoint",
+  "description": "Source data from Prismic with GraphQL",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf ./*.js && babel src --out-dir ./ --extensions '.ts,.tsx'",
-    "prepare": "cross-env NODE_ENV=production npm run build"
+    "clean": "rm -rf ./*.js",
+    "build": "babel src --out-dir ./ --extensions '.ts,.tsx'",
+    "prepare": "yarn clean && cross-env NODE_ENV=production yarn build"
   },
   "repository": {
     "type": "git",
@@ -29,7 +30,17 @@
   },
   "homepage": "https://github.com/birkir/gatsby-source-prismic-graphql#readme",
   "peerDependencies": {
-    "gatsby": ">2.0.0-alpha"
+    "gatsby": ">2.0.0-alpha",
+    "react": "^16.0.0"
+  },
+  "dependencies": {
+    "apollo-boost": "^0.1.23",
+    "apollo-link-context": "^1.0.12",
+    "apollo-link-http-common": "^0.2.8",
+    "gatsby": "^2.0.91",
+    "gatsby-source-graphql-universal": "^2.0.0",
+    "lodash": "^4.17.11",
+    "prismic-javascript": "^2.0.1"
   },
   "devDependencies": {
     "@babel/cli": "7.1.2",
@@ -41,13 +52,9 @@
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.1.0",
     "@babel/runtime": "7.1.2",
+    "@types/lodash": "^4.14.119",
     "@types/node": "10.12.0",
     "@types/react": "16.4.18",
     "cross-env": "5.2.0"
-  },
-  "dependencies": {
-    "apollo-link-context": "^1.0.12",
-    "gatsby-source-graphql-universal": "^2.0.0",
-    "prismic-javascript": "^2.0.1"
   }
 }
