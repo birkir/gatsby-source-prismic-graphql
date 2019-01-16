@@ -12,7 +12,7 @@ interface IPluginOptions {
 }
 
 exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: IPluginOptions) => {
-  let { repositoryName, accessToken, previews = true } = pluginOptions;
+  let { repositoryName, accessToken, previews = false } = pluginOptions;
 
   if (previews === false) {
     // Remove accessToken if previews are disabled

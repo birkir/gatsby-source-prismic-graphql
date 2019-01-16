@@ -77,6 +77,7 @@ export function withPreview<P extends object>(
       const client = getClient();
       try {
         this.setState({ loading: true, error: false });
+        console.log('ELO', client, variables);
         const res = await client.query({
           query: getIsolatedQuery(query, fieldName, typeName),
           fetchPolicy: 'network-only',

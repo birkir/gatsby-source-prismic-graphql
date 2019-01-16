@@ -11,6 +11,7 @@ module.exports = {
       options: {
         repositoryName: 'ueno-starter-kit-universally-test',
         linkResolver,
+        previews: true,
       }
     },
     {
