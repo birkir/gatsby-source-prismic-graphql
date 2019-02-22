@@ -18,6 +18,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "postinstall": "find . -type d -path \"*node_modules/graphql\"  -not -path \"./node_modules/graphql\" -exec rm -r \"{}\" \\;",
     "build": "gatsby build",
     "develop": "gatsby develop",
     "format": "prettier --write '**/*.js'",
@@ -27,7 +28,7 @@
     "prettier": "^1.14.2"
   },
   "resolutions": {
-    "graphql": "0.13.2"
+    "graphql": "14.0.2"
   },
   "repository": {
     "type": "git",

@@ -34,27 +34,27 @@
     "react": "^16.0.0"
   },
   "dependencies": {
-    "apollo-boost": "^0.1.23",
-    "apollo-link-context": "^1.0.12",
-    "apollo-link-http-common": "^0.2.8",
-    "gatsby": "^2.0.91",
-    "gatsby-source-graphql-universal": "^2.0.0",
+    "apollo-boost": "0.1.28",
+    "apollo-link-context": "1.0.14",
+    "apollo-link-http-common": "0.2.10",
+    "gatsby": "2.1.15",
+    "gatsby-source-graphql-universal": "2.0.4",
     "lodash": "^4.17.11",
     "prismic-javascript": "^2.0.1"
   },
   "devDependencies": {
-    "@babel/cli": "7.1.2",
-    "@babel/core": "7.1.2",
-    "@babel/plugin-proposal-class-properties": "7.1.0",
-    "@babel/plugin-proposal-object-rest-spread": "7.0.0",
-    "@babel/plugin-transform-runtime": "7.1.0",
-    "@babel/preset-env": "7.1.0",
+    "@babel/cli": "7.2.3",
+    "@babel/core": "7.3.3",
+    "@babel/plugin-proposal-class-properties": "7.3.3",
+    "@babel/plugin-proposal-object-rest-spread": "7.3.2",
+    "@babel/plugin-transform-runtime": "7.2.0",
+    "@babel/preset-env": "7.3.1",
     "@babel/preset-react": "7.0.0",
-    "@babel/preset-typescript": "7.1.0",
-    "@babel/runtime": "7.1.2",
-    "@types/lodash": "^4.14.119",
-    "@types/node": "10.12.0",
-    "@types/react": "16.4.18",
+    "@babel/preset-typescript": "7.3.3",
+    "@babel/runtime": "7.3.1",
+    "@types/lodash": "4.14.121",
+    "@types/node": "11.9.4",
+    "@types/react": "16.8.4",
     "cross-env": "5.2.0"
   }
 }
