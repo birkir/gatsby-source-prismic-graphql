@@ -9,6 +9,9 @@ import { PrismicLink, getCookies, fieldName, typeName } from './utils';
 interface IPreviewProps {
   children?: any;
   data: any;
+  pageContext: {
+    [key: string]: any;
+  };
   prismic: {
     loading: boolean;
     error: any;
@@ -73,15 +76,14 @@ export function withPreview<P extends object>(
       }
     }
 
-    load = async (variables?: { [key: string]: string }) => {
+    load = async (variables: { [key: string]: string } = this.props.pageContext) => {
       const client = getClient();
       try {
         this.setState({ loading: true, error: false });
-        console.log('ELO', client, variables);
         const res = await client.query({
           query: getIsolatedQuery(query, fieldName, typeName),
           fetchPolicy: 'network-only',
-          variables
+          variables,
         });
 
         if (!res.errors && res.data) {
