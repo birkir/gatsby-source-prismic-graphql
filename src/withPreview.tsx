@@ -2,17 +2,22 @@ import React from 'react';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-boost';
 import Prismic from 'prismic-javascript';
-import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
 import { merge } from 'lodash';
-import { PrismicLink, getCookies, fieldName, typeName } from './utils';
+import { PrismicLink, getCookies} from './utils';
+import path from 'path'
+import Preview from './utils/Preview'
+import { GraphQLError, responsePathAsArray } from 'gatsby-source-prismic-graphql/node_modules/@types/graphql';
+import URL from './utils/url';
+import { DocumentMetadata } from './models/DocumentMetadata';
+
+import gql from 'graphql-tag'
 
 interface IPreviewProps {
   children?: any;
-  data: any;
+  pageContext: any;
   prismic: {
     loading: boolean;
     error: any;
-    load(variables?: { [key: string]: any }): void;
   };
 }
 
@@ -20,11 +25,6 @@ interface IPreviewState {
   data: any;
   error: any;
   loading: boolean;
-}
-
-interface IGatsbyQuery {
-  id: string;
-  source: string;
 }
 
 let client: ApolloClient<any> | undefined = undefined;
@@ -48,49 +48,91 @@ const getClient = (): ApolloClient<any> => {
   }
   return client;
 };
-
 export function withPreview<P extends object>(
-  ComposedComponent?: React.ComponentType<P | IPreviewProps> & { query: any },
-  query?: IGatsbyQuery
+  ComposedComponent?: React.ComponentType<P | IPreviewProps> & { query: any }
 ) {
   return class extends React.Component<IPreviewProps, IPreviewState> {
-    state = {
-      // proxy data to state
-      data: this.props.data,
-      loading: false,
-      error: null
-    };
+    constructor(props: IPreviewProps) {
+      super(props)
+
+      this.state = {
+        // proxy data to state
+        data: props.pageContext.data || null,
+        loading: this.isPreviewMode(),
+        error: null
+      };
+    }
 
     componentDidMount() {
+      if(this.state.loading) this.load()
+    }
+
+    isPreviewMode() {
       if (typeof window !== 'undefined' && document.cookie) {
         const cookies = getCookies();
-        if (
-          cookies.has(Prismic.experimentCookie) ||
-          cookies.has(Prismic.previewCookie)
-        ) {
-          this.load();
-        }
+        return cookies.has(Prismic.experimentCookie) || cookies.has(Prismic.previewCookie)
+      } else {
+        return false
       }
+    }
+
+    buildMeta(pattern: string, customType?: string) {
+      const parsedUrl = URL.parse(pattern, (window as any).location.pathname)
+      return {
+        uid: parsedUrl.uid,
+        lang: parsedUrl.lang,
+        customType
+      } as DocumentMetadata
+    }
+
+    buildPreviewQuery() {
+      const { _PRISMIC_PREVIEW_QUERY_FN_, _PRISMIC_PREVIEW_QUERY_, _PRISMIC_URL_PATTERN_, _PRISMIC_CUSTOM_TYPE_ } = this.props.pageContext
+      if(_PRISMIC_PREVIEW_QUERY_) {
+        return _PRISMIC_PREVIEW_QUERY_
+      } else if(_PRISMIC_PREVIEW_QUERY_FN_) {
+        const docMeta = this.buildMeta(_PRISMIC_URL_PATTERN_, _PRISMIC_CUSTOM_TYPE_)
+        return Preview.convertToGraphQL(_PRISMIC_PREVIEW_QUERY_FN_, docMeta)
+      }
+      else return null
+    }
+
+    async queryDoc(client: ApolloClient<any>, query: any, variables?: { [key: string]: string }): Promise<[ReadonlyArray<GraphQLError> | null, any | null]> {
+      const res = await client.query<any>({
+        query,
+        fetchPolicy: 'network-only',
+        variables
+      })
+      const q = query
+      const prefix = (() => {
+        const def = q.definitions[0] || {}
+        const selection = (def.selectionSet || { selections: [] }).selections[0]
+        return selection && selection.name ? selection.name.value : null
+      })()
+      if(res.errors) return [res.errors, null]
+      else if(res.data && prefix) return [null, res.data[prefix].edges.length > 0 ? res.data[prefix].edges[0].node : null]
+      else return [null, null]
     }
 
     load = async (variables?: { [key: string]: string }) => {
       const client = getClient();
       try {
-        this.setState({ loading: true, error: false });
-        console.log('ELO', client, variables);
-        const res = await client.query({
-          query: getIsolatedQuery(query, fieldName, typeName),
-          fetchPolicy: 'network-only',
-          variables
-        });
-
-        if (!res.errors && res.data) {
-          this.setState({
-            loading: false,
-            data: merge(this.state.data, { [fieldName]: res.data })
-          });
+        this.setState({ error: false });
+        const query = this.buildPreviewQuery()
+        if(query) {
+          const [errors, data] = await this.queryDoc(client, query, variables)
+          if (!errors && data) {
+            this.setState({
+              loading: false,
+              data: merge(this.state.data, data)
+            });
+          } else {
+            this.setState({ error: errors, loading: false });
+          }
         } else {
-          this.setState({ error: res.errors, loading: false });
+          this.setState({
+            loading: false
+          });
+          console.error('Failed to fetch preview');
         }
       } catch (err) {
         console.error('Failed to fetch preview', err);
@@ -100,23 +142,16 @@ export function withPreview<P extends object>(
     render() {
       const prismic = {
         loading: this.state.loading,
-        error: this.state.error,
-        load: this.load
+        error: this.state.error
       };
 
-      if (!ComposedComponent) {
-        return React.cloneElement(this.props.children, {
-          ...this.props,
-          prismic,
-          data: this.state.data
-        });
-      }
-
+      if(prismic.loading) return null
+      if ((!ComposedComponent || !this.state.data)) return null // return 404
       return (
         <ComposedComponent
           {...this.props}
           prismic={prismic}
-          data={this.state.data}
+          pageContext={Object.assign({}, this.props.pageContext, {data: this.state.data})}
         />
       );
     }

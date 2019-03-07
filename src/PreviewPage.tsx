@@ -1,7 +1,6 @@
 import React from 'react';
 import Prismic from 'prismic-javascript';
-import { qs, linkResolver, componentResolver, getCookies } from './utils';
-import { withPreview } from './withPreview';
+import { qs, linkResolver, getCookies } from './utils';
 
 interface IVariation {
   id: string;
@@ -91,29 +90,10 @@ export class PreviewPage extends React.Component<any> {
     }
 
     const link = linkResolver(doc);
-    const exists = await fetch(link).then(res => res.status) === 200;
-
-    if (exists) {
-      (window as any).location = link;
-      return;
-    }
-
-    if (typeof componentResolver === 'function') {
-      this.setState({
-        component: componentResolver(doc)
-      });
-      window.history.replaceState({}, 'prismic', window.location.pathname + '?documentId=' + doc.id);
-    }
+    (window as any).location = link;
   }
 
   public render() {
-    if (this.state.component) {
-      const component = (this.state.component as any).default || this.state.component;
-      if (component.query) {
-        return React.createElement(withPreview(component, component.query));
-      }
-      return React.createElement(component);
-    }
     return null;
   }
 }

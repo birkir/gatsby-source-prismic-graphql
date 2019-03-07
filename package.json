@@ -1,6 +1,6 @@
 {
-  "name": "gatsby-source-prismic-graphql",
-  "version": "2.1.0",
+  "name": "@prismicio/gatsby-source-prismic-graphql",
+  "version": "0.0.1",
   "description": "Source data from Prismic with GraphQL",
   "main": "index.js",
   "scripts": {
@@ -37,10 +37,10 @@
     "apollo-boost": "^0.1.23",
     "apollo-link-context": "^1.0.12",
     "apollo-link-http-common": "^0.2.8",
-    "gatsby": "^2.0.91",
     "gatsby-source-graphql-universal": "^2.0.0",
     "lodash": "^4.17.11",
-    "prismic-javascript": "^2.0.1"
+    "prismic-javascript": "^2.0.1",
+    "url-pattern": "^1.0.3"
   },
   "devDependencies": {
     "@babel/cli": "7.1.2",

@@ -25,12 +25,8 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: 
       dangerouslySetInnerHTML={{
         __html: `window.___sourcePrismicGraphql = ${JSON.stringify({ repositoryName, accessToken, previews })}; `
       }}
-    />
-  ]);
-
-  if (previews) {
-    setHeadComponents([
-      <script
+    />,
+    <script
         key="prismic-config"
         dangerouslySetInnerHTML={{
           __html: `
@@ -40,8 +36,6 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: 
           `
         }}
       />,
-      <script key="prismic-script" type="text/javascript" src="//static.cdn.prismic.io/prismic.min.js" />
-    ]);
-  }
-
+    <script key="prismic-script" type="text/javascript" src="//static.cdn.prismic.io/prismic.min.js" />
+  ]);
 }
