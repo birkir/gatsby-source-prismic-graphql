@@ -100,6 +100,8 @@ You can refer to the examples above
 ### Prismic Previews
 
 You can enable previews by setting `options.previews = true` in `gatsby-config.js`.
+To fetch the content in preview, this plugin will generate a preview query based on the original query made in `gatsby-node.js`.
+In case it requires a uid and a lang, it will be taken from the url and injected in the preview query.
 
 #### Component wrapper for your component
 

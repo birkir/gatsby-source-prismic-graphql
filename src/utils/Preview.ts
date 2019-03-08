@@ -50,15 +50,18 @@ function buildArgument(key: string, value: string): ArgumentNode {
   } as ArgumentNode
 }
 function buildQueryByUID(baseQuery: DocumentNode, hasLang?: boolean): DocumentNode {
-  const definitions = baseQuery.definitions.map((def: DefinitionNode) => {
-    const args = (() => {
-      const base = [buildArgument('uid', uidTag)]
-      if(hasLang) return base.concat([buildArgument('lang', langTag)])
-      else return base
-    })()
+  const definitions = baseQuery.definitions.map((def: DefinitionNode, index: number) => {
+    // we only update the first definition which is supposed to be the main document.
+    if(index === 0) {
+      const args = (() => {
+        const base = [buildArgument('uid', uidTag)]
+        if(hasLang) return base.concat([buildArgument('lang', langTag)])
+        else return base
+      })()
 
-    // querySelection.selectionSet.map((s: any) => console.log(s))
-    return updateSelectionSet((def as OperationDefinitionNode).selectionSet, { arguments: args })
+      // querySelection.selectionSet.map((s: any) => console.log(s))
+      return updateSelectionSet((def as OperationDefinitionNode).selectionSet, { arguments: args })
+    } else return def
   })
   return Object.assign({}, baseQuery, { definitions }) as DocumentNode
 }
