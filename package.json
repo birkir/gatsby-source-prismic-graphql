@@ -1,11 +1,12 @@
 {
   "name": "gatsby-source-prismic-graphql",
-  "version": "2.2.1",
+  "version": "2.2.3",
   "description": "Source data from Prismic with GraphQL",
   "main": "index.js",
+  "types": "./types/index.d.ts",
   "scripts": {
     "clean": "rm -rf ./*.js",
-    "build": "babel src --out-dir ./ --extensions '.ts,.tsx'",
+    "build": "tsc --emitDeclarationOnly && babel src --out-dir ./ --extensions '.ts,.tsx'",
     "prepare": "yarn clean && cross-env NODE_ENV=production yarn build"
   },
   "repository": {

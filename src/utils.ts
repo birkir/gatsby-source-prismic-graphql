@@ -2,8 +2,9 @@ import Prismic from 'prismic-javascript';
 import { HttpLink } from 'apollo-link-http';
 import { setContext } from 'apollo-link-context';
 import { HttpOptions } from 'apollo-link-http-common';
+import { ApolloLink } from 'apollo-link-context/node_modules/apollo-link';
 
-interface IPrismicLinkArgs extends HttpOptions {
+export interface IPrismicLinkArgs extends HttpOptions {
   uri: string;
   accessToken?: string;
   useGETForQueries?: boolean;
@@ -47,7 +48,7 @@ export function PrismicLink({ uri, accessToken, ...rest }: IPrismicLinkArgs) {
   if (matches && matches[1]) {
     const prismicClient = Prismic.client(`${matches[1]}/api`, { accessToken });
     const prismicLink = setContext(
-      async (request, options: { headers: { [key: string]: string; } }) => {
+      async (request: any, options: { headers: { [key: string]: string; } }) => {
         let prismicRef;
         if (typeof window !== 'undefined' && document.cookie) {
           const cookies = getCookies();

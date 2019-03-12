@@ -6,7 +6,7 @@ import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
 import { merge } from 'lodash';
 import { PrismicLink, getCookies, fieldName, typeName } from './utils';
 
-interface IPreviewProps {
+export interface IPreviewProps {
   children?: any;
   data: any;
   pageContext: {
@@ -19,13 +19,13 @@ interface IPreviewProps {
   };
 }
 
-interface IPreviewState {
+export interface IPreviewState {
   data: any;
   error: any;
   loading: boolean;
 }
 
-interface IGatsbyQuery {
+export interface IGatsbyQuery {
   id: string;
   source: string;
 }
