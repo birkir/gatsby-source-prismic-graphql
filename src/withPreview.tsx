@@ -35,17 +35,22 @@ let client: ApolloClient<any> | undefined = undefined;
 const getClient = (): ApolloClient<any> => {
   if (!client) {
     let repositoryName: string = '';
+    let linkOptions = {};
     if (typeof window !== 'undefined') {
       const registry = (window as any).___sourcePrismicGraphql;
       if (registry.repositoryName) {
         repositoryName = registry.repositoryName;
+      }
+      if (registry.linkOptions) {
+        linkOptions = registry.linkOptions;
       }
     }
     client = new ApolloClient({
       cache: new InMemoryCache(),
       link: PrismicLink({
         uri: `https://${repositoryName}.prismic.io/graphql`,
-        credentials: 'same-origin'
+        credentials: 'same-origin',
+        ...linkOptions,
       })
     });
   }

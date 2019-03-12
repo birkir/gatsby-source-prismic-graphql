@@ -9,10 +9,21 @@ interface IPluginOptions {
   accessToken?: null | string;
   previews?: boolean;
   linkResolver?: Function;
+  linkOptions?: {
+    useGETForQueries?: boolean;
+    headers?: {
+      [key: string]: string | number;
+    };
+    fetchOptions?: {
+      [key: string]: string | number;
+    };
+    credentials?: 'omit' | 'include' | 'same-origin';
+    includeExtensions?: boolean;
+  }
 }
 
 exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: IPluginOptions) => {
-  let { repositoryName, accessToken, previews = false } = pluginOptions;
+  let { repositoryName, accessToken, previews = false, linkOptions } = pluginOptions;
 
   if (previews === false) {
     // Remove accessToken if previews are disabled
@@ -23,7 +34,7 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: 
     <script
       key={`plugin-source-prismic-graphql`}
       dangerouslySetInnerHTML={{
-        __html: `window.___sourcePrismicGraphql = ${JSON.stringify({ repositoryName, accessToken, previews })}; `
+        __html: `window.___sourcePrismicGraphql = ${JSON.stringify({ repositoryName, accessToken, previews, linkOptions })}; `
       }}
     />
   ]);

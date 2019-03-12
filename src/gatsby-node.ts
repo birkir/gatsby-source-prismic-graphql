@@ -23,13 +23,14 @@ interface PluginOptions {
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
-exports.sourceNodes = (ref: any, options: { [key: string]: any; accessToken?: string; repositoryName: string }) => {
+exports.sourceNodes = (ref: any, options: { [key: string]: any; accessToken?: string; repositoryName: string, linkOptions?: any }) => {
   options.fieldName = fieldName;
   options.typeName = typeName;
   options.createLink = () => PrismicLink({
     uri: `https://${options.repositoryName}.prismic.io/graphql`,
     credentials: 'same-origin',
     accessToken: options.accessToken,
+    ...options.linkOptions,
   });
 
   return sourceNodes(ref, options);
