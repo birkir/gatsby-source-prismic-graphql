@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-prismic-graphql",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Source data from Prismic with GraphQL",
   "main": "index.js",
   "types": "./types/index.d.ts",
@@ -15,7 +15,8 @@
   },
   "files": [
     "*.js",
-    "src"
+    "src",
+    "types"
   ],
   "keywords": [
     "gatsby",
