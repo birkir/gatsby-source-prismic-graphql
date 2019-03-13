@@ -4,9 +4,15 @@
   "description": "Source data from Prismic with GraphQL",
   "main": "index.js",
   "scripts": {
-    "clean": "rm -rf ./*.js",
-    "build": "babel src --out-dir ./ --extensions '.ts,.tsx'",
-    "prepare": "yarn clean && cross-env NODE_ENV=production yarn build"
+    "clean": "yarn clean-main && yarn clean-utils",
+    "clean-main": "rm -rf ./*.js",
+    "clean-utils": "rm -rf ./utils",
+    "build": "yarn build-main && yarn build-utils",
+    "build-main": "babel src/ --out-dir ./ --extensions '.ts,.tsx'",
+    "build-utils": "babel src/utils/ --out-dir ./utils/ --extensions '.ts,.tsx'",
+    "prepare": "yarn clean && cross-env NODE_ENV=production yarn build",
+    "webpack-dev": "webpack --watch --mode development",
+    "webpack-prod": "webpack --mode production"
   },
   "repository": {
     "type": "git",
@@ -55,6 +61,10 @@
     "@types/lodash": "^4.14.119",
     "@types/node": "10.12.0",
     "@types/react": "16.4.18",
-    "cross-env": "5.2.0"
+    "cross-env": "5.2.0",
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.0",
+    "webpack-node-externals": "^1.7.2"
   }
 }
