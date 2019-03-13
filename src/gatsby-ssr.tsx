@@ -1,4 +1,6 @@
 import React from 'react';
+import fs from 'fs';
+import path from 'path';
 
 interface OnRenderBodyArgs {
   setHeadComponents(args: React.ReactElement<any>[]): void;
@@ -30,29 +32,35 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: 
     accessToken = null;
   }
 
+  let fragmentMatcher;
+  try {
+    const fragmentData = fs.readFileSync(path.join(process.cwd(), '.cache', 'prismic.fragments.json'), 'utf8');
+    fragmentMatcher = JSON.parse(fragmentData);
+  } catch (err) {
+    console.log('Failed to fetch fragment matches', err);
+  }
+
   setHeadComponents([
     <script
       key={`plugin-source-prismic-graphql`}
       dangerouslySetInnerHTML={{
-        __html: `window.___sourcePrismicGraphql = ${JSON.stringify({ repositoryName, accessToken, previews, linkOptions })}; `
+        __html: `window.___sourcePrismicGraphql = ${JSON.stringify({ repositoryName, accessToken, previews, linkOptions, fragmentMatcher })}; `
       }}
     />
   ]);
 
-  if (previews) {
-    setHeadComponents([
-      <script
-        key="prismic-config"
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.prismic = {
-              endpoint: 'https://${repositoryName}.prismic.io/api/v2'
-            };
-          `
-        }}
-      />,
-      <script key="prismic-script" type="text/javascript" src="//static.cdn.prismic.io/prismic.min.js" />
-    ]);
-  }
+  setHeadComponents([
+    <script
+      key="prismic-config"
+      dangerouslySetInnerHTML={{
+        __html: `
+          window.prismic = {
+            endpoint: 'https://${repositoryName}.prismic.io/api/v2'
+          };
+        `
+      }}
+    />,
+    <script key="prismic-script" type="text/javascript" src="//static.cdn.prismic.io/prismic.min.js" />
+  ]);
 
 }

@@ -3,7 +3,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-boost';
 import Prismic from 'prismic-javascript';
 import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
-import { merge } from 'lodash';
+import { merge, omitBy, isObject } from 'lodash';
 import { PrismicLink, getCookies, fieldName, typeName } from './utils';
 
 export interface IPreviewProps {
@@ -36,6 +36,7 @@ const getClient = (): ApolloClient<any> => {
   if (!client) {
     let repositoryName: string = '';
     let linkOptions = {};
+    let memoryCache;
     if (typeof window !== 'undefined') {
       const registry = (window as any).___sourcePrismicGraphql;
       if (registry.repositoryName) {
@@ -44,9 +45,14 @@ const getClient = (): ApolloClient<any> => {
       if (registry.linkOptions) {
         linkOptions = registry.linkOptions;
       }
+      if (registry.fragmentMatcher) {
+        const fragmentMatcher = registry.fragmentMatcher;
+        memoryCache = { fragmentMatcher };
+      }
     }
+
     client = new ApolloClient({
-      cache: new InMemoryCache(),
+      cache: new InMemoryCache(memoryCache),
       link: PrismicLink({
         uri: `https://${repositoryName}.prismic.io/graphql`,
         credentials: 'same-origin',
@@ -83,12 +89,15 @@ export function withPreview<P extends object>(
 
     load = async (variables: { [key: string]: string } = this.props.pageContext) => {
       const client = getClient();
+
+
+
       try {
         this.setState({ loading: true, error: false });
         const res = await client.query({
           query: getIsolatedQuery(query, fieldName, typeName),
           fetchPolicy: 'network-only',
-          variables,
+          variables: omitBy(variables, isObject),
         });
 
         if (!res.errors && res.data) {

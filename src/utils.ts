@@ -3,6 +3,12 @@ import { HttpLink } from 'apollo-link-http';
 import { setContext } from 'apollo-link-context';
 import { HttpOptions } from 'apollo-link-http-common';
 import { ApolloLink } from 'apollo-link-context/node_modules/apollo-link';
+import { IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
+import path from 'path';
+
+// const fragmentMatcher = new IntrospectionFragmentMatcher({
+//   introspectionQueryResultData
+// });
 
 export interface IPrismicLinkArgs extends HttpOptions {
   uri: string;
