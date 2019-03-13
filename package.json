@@ -10,9 +10,7 @@
     "build": "yarn build-main && yarn build-utils",
     "build-main": "babel src/ --out-dir ./ --extensions '.ts,.tsx'",
     "build-utils": "babel src/utils/ --out-dir ./utils/ --extensions '.ts,.tsx'",
-    "prepare": "yarn clean && cross-env NODE_ENV=production yarn build",
-    "webpack-dev": "webpack --watch --mode development",
-    "webpack-prod": "webpack --mode production"
+    "prepare": "yarn clean && cross-env NODE_ENV=production yarn build"
   },
   "repository": {
     "type": "git",
@@ -20,7 +18,8 @@
   },
   "files": [
     "*.js",
-    "src"
+    "src",
+    "utils"
   ],
   "keywords": [
     "gatsby",
