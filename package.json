@@ -1,6 +1,6 @@
 {
   "name": "@prismicio/gatsby-source-prismic-graphql",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Source data from Prismic with GraphQL",
   "main": "index.js",
   "scripts": {
