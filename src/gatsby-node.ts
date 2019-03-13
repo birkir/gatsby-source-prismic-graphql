@@ -1,5 +1,5 @@
 import path from 'path';
-import { sourceNodes, onCreateWebpackConfig } from 'gatsby-source-graphql-universal/gatsby-node';
+import { sourceNodes } from 'gatsby-source-graphql/gatsby-node';
 import { PrismicLink, fieldName, typeName } from './utils';
 
 exports.sourceNodes = (ref: any, options: { [key: string]: any; accessToken?: string; repositoryName: string }) => {
@@ -32,8 +32,6 @@ interface PluginOptions {
   repositoryName: string;
   path?: null | string;
 }
-
-exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
 exports.createPages = ({ actions }: CreatePage, options: PluginOptions) => {
   const previewPath = (options.path || '/preview');

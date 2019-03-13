@@ -1,4 +1,5 @@
 import gql from 'graphql-tag'
+import traverse from 'traverse'
 import { DocumentMetadata } from '../models/DocumentMetadata'
 import { QueryStorage } from '../models/QueryStorage';
 import { parse, print, DefinitionNode, OperationDefinitionNode, SelectionSetNode, FieldNode, SelectionNode, DocumentNode, ArgumentNode } from 'graphql'
@@ -66,19 +67,31 @@ function buildQueryByUID(baseQuery: DocumentNode, hasLang?: boolean): DocumentNo
   return Object.assign({}, baseQuery, { definitions }) as DocumentNode
 }
 
+function stripeGatsbyPrefixes(query: DocumentNode, typeName: string) {
+  traverse(query).forEach(function (x) {
+  if (this.isLeaf && this.parent && this.parent.key === 'name') {
+    if (this.parent.parent && this.parent.parent.node.kind === 'NamedType') {
+      if (typeof x === 'string' && x.indexOf(`${typeName}_`) === 0) {
+        this.update(x.substr(typeName.length + 1));
+      }
+    }
+  }
+});
+}
 function buildQuery(docMeta: DocumentMetadata, queryStorage: QueryStorage): string | null {
   if(!queryStorage.query) return null
 
   const baseQuery: DocumentNode = extractQueryFromGatsbyNamespace(queryStorage.query)
-  const finalQuery = (() => {
+  const withUIDQuery = (() => {
     if(docMeta.uid) {
       return buildQueryByUID(baseQuery)
     } else {
       return baseQuery
     }
   })()
+  const previewQuery = stripeGatsbyPrefixes(withUIDQuery, 'PRISMIC')
   //need to return query as string for future interpolation for unpublished doc
-  return print(finalQuery)
+  return print(previewQuery)
 }
 
 function convertToGraphQL(strQuery: String, docMeta: DocumentMetadata) {

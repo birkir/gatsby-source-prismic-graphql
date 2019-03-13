@@ -4,9 +4,8 @@ import { ApolloClient } from 'apollo-boost';
 import Prismic from 'prismic-javascript';
 import { merge } from 'lodash';
 import { PrismicLink, getCookies} from './utils';
-import path from 'path'
 import Preview from './utils/Preview'
-import { GraphQLError, responsePathAsArray } from 'gatsby-source-prismic-graphql/node_modules/@types/graphql';
+import { GraphQLError } from 'gatsby-source-prismic-graphql/node_modules/@types/graphql';
 import URL from './utils/url';
 import { DocumentMetadata } from './models/DocumentMetadata';
 
