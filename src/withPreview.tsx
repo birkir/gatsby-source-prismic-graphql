@@ -85,7 +85,7 @@ export function withPreview<P extends object>(
           cookies.has(Prismic.experimentCookie) ||
           cookies.has(Prismic.previewCookie)
         ) {
-          if (registry && registry.preview) {
+          if (registry && registry.previews) {
             this.load();
           }
         }
