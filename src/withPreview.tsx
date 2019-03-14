@@ -1,5 +1,5 @@
 import React from 'react';
-import { InMemoryCache } from 'apollo-cache-inmemory';
+import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-boost';
 import Prismic from 'prismic-javascript';
 import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
@@ -46,7 +46,9 @@ const getClient = (): ApolloClient<any> => {
         linkOptions = registry.linkOptions;
       }
       if (registry.fragmentMatcher) {
-        const fragmentMatcher = registry.fragmentMatcher;
+        const fragmentMatcher = new IntrospectionFragmentMatcher({
+          introspectionQueryResultData: registry.fragmentMatcher
+        });
         memoryCache = { fragmentMatcher };
       }
     }
