@@ -32,7 +32,6 @@ export function createPage(gatsbyCreatePage: any, queryStorage: QueryStorage, di
       _PRISMIC_PREVIEW_QUERY_: previewQueryGraphQL
     }
 
-    //TODO build path from pattern and params
     const customOptions = Object.assign({}, options, {
       path: URL.build(options.pattern, options.params),
       context: Object.assign({}, options.context, additionalContext)

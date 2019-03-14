@@ -1,15 +1,14 @@
 import React from 'react';
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-boost';
-import Prismic from 'prismic-javascript';
+// import { InMemoryCache } from 'apollo-cache-inmemory';
+import { ApolloClient, InMemoryCache } from 'apollo-boost';
+import { IntrospectionFragmentMatcher } from 'apollo-boost';
 import { merge } from 'lodash';
 import { PrismicLink, getCookies} from './utils';
 import Preview from './utils/Preview'
 import { GraphQLError } from 'gatsby-source-prismic-graphql/node_modules/@types/graphql';
 import URL from './utils/url';
 import { DocumentMetadata } from './models/DocumentMetadata';
-
-import gql from 'graphql-tag'
+import Prismic from 'prismic-javascript'
 
 interface IPreviewProps {
   children?: any;
@@ -20,15 +19,154 @@ interface IPreviewProps {
   };
 }
 
+interface PrismicInfos {
+  repositoryName: string
+  accessToken: string
+  previews: boolean
+}
 interface IPreviewState {
   data: any;
   error: any;
   loading: boolean;
+  prismicInfos: PrismicInfos
 }
 
 let client: ApolloClient<any> | undefined = undefined;
 
-const getClient = (): ApolloClient<any> => {
+//useful for apollo in memory cache when using union types/fragments while matching slices.
+function introspectionQuery() {
+  return `
+  query IntrospectionQuery {
+    __schema {
+      queryType { name }
+      mutationType { name }
+      subscriptionType { name }
+      types {
+        ...FullType
+      }
+      directives {
+        name
+        description
+        locations
+        args {
+          ...InputValue
+        }
+      }
+    }
+  }
+
+  fragment FullType on __Type {
+    kind
+    name
+    description
+    fields(includeDeprecated: true) {
+      name
+      description
+      args {
+        ...InputValue
+      }
+      type {
+        ...TypeRef
+      }
+      isDeprecated
+      deprecationReason
+    }
+    inputFields {
+      ...InputValue
+    }
+    interfaces {
+      ...TypeRef
+    }
+    enumValues(includeDeprecated: true) {
+      name
+      description
+      isDeprecated
+      deprecationReason
+    }
+    possibleTypes {
+      ...TypeRef
+    }
+  }
+
+  fragment InputValue on __InputValue {
+    name
+    description
+    type { ...TypeRef }
+    defaultValue
+  }
+
+  fragment TypeRef on __Type {
+    kind
+    name
+    ofType {
+      kind
+      name
+      ofType {
+        kind
+        name
+        ofType {
+          kind
+          name
+          ofType {
+            kind
+            name
+            ofType {
+              kind
+              name
+              ofType {
+                kind
+                name
+                ofType {
+                  kind
+                  name
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  `
+}
+
+async function makeIntrospectionQuery(uri: string, repositoryName: string, accessToken: string): Promise<any> {
+  const params = `?query=${encodeURIComponent(introspectionQuery())}`
+  const ref = await getPrismicRef(repositoryName, accessToken)
+  return fetch(uri + params, {
+    method: 'GET',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+      'Prismic-ref': ref
+    } as HeadersInit
+  }).then(r => r.json())
+}
+async function buildCache(uri: string, repositoryName: string, accessToken: string): Promise<InMemoryCache> {
+  const introspection = await makeIntrospectionQuery(uri, repositoryName, accessToken)
+  const filteredData = introspection.data.__schema.types.filter(
+    (type: any) => type.possibleTypes !== null,
+  )
+  introspection.data.__schema.types = filteredData
+
+  const fragmentMatcher = new IntrospectionFragmentMatcher({ introspectionQueryResultData: introspection.data })
+  return new InMemoryCache({ fragmentMatcher })
+}
+
+async function getPrismicRef(repositoryName: string, accessToken: string) {
+  const prismicClient = Prismic.client(`https://${repositoryName}/api`, { accessToken });
+
+  const cookies = getCookies();
+  if (cookies.has(Prismic.experimentCookie)) {
+    return cookies.get(Prismic.experimentCookie);
+  } else if (cookies.has(Prismic.previewCookie)) {
+    return cookies.get(Prismic.previewCookie);
+  }
+  const api = await prismicClient.getApi();
+  return api.masterRef.ref;
+}
+
+const getClient = async (repositoryName: string, accessToken: string): Promise<ApolloClient<any>> => {
   if (!client) {
     let repositoryName: string = '';
     if (typeof window !== 'undefined') {
@@ -37,10 +175,13 @@ const getClient = (): ApolloClient<any> => {
         repositoryName = registry.repositoryName;
       }
     }
+    const uri = `https://${repositoryName}.prismic.io/graphql`
+    const cache = await buildCache(uri, repositoryName, accessToken)
+
     client = new ApolloClient({
-      cache: new InMemoryCache(),
+      cache,
       link: PrismicLink({
-        uri: `https://${repositoryName}.prismic.io/graphql`,
+        uri,
         credentials: 'same-origin'
       })
     });
@@ -53,12 +194,13 @@ export function withPreview<P extends object>(
   return class extends React.Component<IPreviewProps, IPreviewState> {
     constructor(props: IPreviewProps) {
       super(props)
-
+      const prismicInfos = (window as any).___sourcePrismicGraphql
       this.state = {
         // proxy data to state
         data: props.pageContext.data || null,
-        loading: this.isPreviewMode(),
-        error: null
+        loading: prismicInfos.previews && this.isPreviewMode(),
+        error: null,
+        prismicInfos
       };
     }
 
@@ -113,7 +255,7 @@ export function withPreview<P extends object>(
     }
 
     load = async (variables?: { [key: string]: string }) => {
-      const client = getClient();
+      const client = await getClient(this.state.prismicInfos.repositoryName, this.state.prismicInfos.accessToken);
       try {
         this.setState({ error: false });
         const query = this.buildPreviewQuery()

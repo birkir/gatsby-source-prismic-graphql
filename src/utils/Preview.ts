@@ -68,7 +68,7 @@ function buildQueryByUID(baseQuery: DocumentNode, hasLang?: boolean): DocumentNo
 }
 
 function stripeGatsbyPrefixes(query: DocumentNode, typeName: string) {
-  traverse(query).forEach(function (x) {
+  return traverse(query).forEach(function (x) {
   if (this.isLeaf && this.parent && this.parent.key === 'name') {
     if (this.parent.parent && this.parent.parent.node.kind === 'NamedType') {
       if (typeof x === 'string' && x.indexOf(`${typeName}_`) === 0) {
