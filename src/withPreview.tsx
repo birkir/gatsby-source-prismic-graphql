@@ -77,21 +77,21 @@ export function withPreview<P extends object>(
 
     componentDidMount() {
       if (typeof window !== 'undefined' && document.cookie) {
+        const registry = (window as any).___sourcePrismicGraphql;
         const cookies = getCookies();
         if (
           cookies.has(Prismic.experimentCookie) ||
           cookies.has(Prismic.previewCookie)
         ) {
-          this.load();
+          if (registry && registry.preview) {
+            this.load();
+          }
         }
       }
     }
 
     load = async (variables: { [key: string]: string } = this.props.pageContext) => {
       const client = getClient();
-
-
-
       try {
         this.setState({ loading: true, error: false });
         const res = await client.query({
