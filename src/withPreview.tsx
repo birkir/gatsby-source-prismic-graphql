@@ -194,7 +194,7 @@ export function withPreview<P extends object>(
   return class extends React.Component<IPreviewProps, IPreviewState> {
     constructor(props: IPreviewProps) {
       super(props)
-      const prismicInfos = (window as any).___sourcePrismicGraphql
+      const prismicInfos = (typeof window !== 'undefined') ? (window as any).___sourcePrismicGraphql : {}
       this.state = {
         // proxy data to state
         data: props.pageContext.data || null,
