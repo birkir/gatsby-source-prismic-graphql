@@ -1,14 +1,14 @@
 import React from 'react';
-// import { InMemoryCache } from 'apollo-cache-inmemory';
 import { ApolloClient, InMemoryCache } from 'apollo-boost';
 import { IntrospectionFragmentMatcher } from 'apollo-boost';
 import { merge } from 'lodash';
-import { PrismicLink, getCookies} from './utils';
+import { PrismicLink, getCookies, Component404 } from './utils';
 import Preview from './utils/Preview'
 import { GraphQLError } from 'gatsby-source-prismic-graphql/node_modules/@types/graphql';
 import URL from './utils/url';
 import { DocumentMetadata } from './models/DocumentMetadata';
 import Prismic from 'prismic-javascript'
+import PreviewLoader from './PreviewLoader'
 
 interface IPreviewProps {
   children?: any;
@@ -286,8 +286,16 @@ export function withPreview<P extends object>(
         error: this.state.error
       };
 
-      if(prismic.loading) return null
-      if ((!ComposedComponent || !this.state.data)) return null // return 404
+      if(prismic.loading) return <PreviewLoader />
+      if ((!ComposedComponent || !this.state.data)) {
+        console.log("Component404")
+        console.log(Component404)
+        if(Component404 && (Component404 as any).default) {
+          const NotFound = (Component404 as any).default
+          return <NotFound />
+        }
+        else (window as any).location = '/404.html'; // return 404
+      }
       return (
         <ComposedComponent
           {...this.props}

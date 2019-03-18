@@ -14,8 +14,8 @@ export const fieldName = 'prismic';
 export const typeName = 'PRISMIC';
 
 // keep link resolver function
-export let linkResolver: (doc: any) => string;
-export let componentResolver: (doc: any) => React.Component;
+export let linkResolver: (doc: any) => string = () => '/';
+export let Component404: () => React.Component
 
 export function qs(qs: string = '', delimiter: string = '&'): Map<string, string> {
   return new Map(
@@ -26,11 +26,12 @@ export function qs(qs: string = '', delimiter: string = '&'): Map<string, string
   );
 }
 
-export function registerResolvers(link: typeof linkResolver, component?: typeof componentResolver) {
+export function registerLinkResolver(link: typeof linkResolver) {
   linkResolver = link;
-  if (component) {
-    componentResolver = component;
-  }
+}
+
+export function register404(component: () => React.Component) {
+  Component404 = component
 }
 
 export function getCookies() {
