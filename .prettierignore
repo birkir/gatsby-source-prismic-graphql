@@ -1,0 +1,5 @@
+.cache
+node_modules
+public
+packages/gatsby-source-prismic-graphql/**/*.js
+packages/gatsby-source-prismic-graphql/types/*

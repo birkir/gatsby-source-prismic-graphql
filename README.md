@@ -2,11 +2,23 @@
 
 Source data from Prismic with GraphQL
 
+## Development
+
+```
+git clone git@github.com:birkir/gatsby-source-prismic-graphql.git
+cd gatsby-source-prismic-graphql
+yarn install
+yarn setup
+yarn dev
+```
+
+
 ### Differences from `gatsby-source-prismic`
 
 This plugin will require [graphql enabled](https://prismic.io/blog/graphql-api-alpha-release) in your Prismic instance.
 
-The feature is currently in _alpha_ and not recommended in production. However that being said, by using Gatsby you have the garantee of production builds to never break as they are statically compiled.
+The feature is currently in _alpha_ and not recommended in production. However that being said, by using Gatsby you have the garantee of production builds to never break as they are 
+statically compiled.
 
 ## Installing
 
@@ -229,3 +241,4 @@ registerResolvers(linkResolver, componentResolver);
 This plugin does not have gatsby-plugin-sharp support.
 
 Please raise an issue on GitHub if you have any problems.
+
