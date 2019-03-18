@@ -1,5 +1,5 @@
-import { Data, PageOptions } from 'gatsby-source-prismic-graphql/src/models/PageOptions'
-import { DocumentMetadata } from 'gatsby-source-prismic-graphql/src/models/DocumentMetadata'
+import { Data, PageOptions } from '../models/PageOptions'
+import { DocumentMetadata } from '../models/DocumentMetadata'
 
 export default {
   buildMetadata(data: Data) {

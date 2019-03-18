@@ -5,6 +5,8 @@ declare module 'jsonfn' {
   }
 }
 
-declare module 'gatsby-source-graphql/gatsby-node' {
+declare module 'gatsby-source-graphql-universal/gatsby-node' {
   function sourceNodes(ref: any, options: any): any
 }
+
+declare module 'gatsby';

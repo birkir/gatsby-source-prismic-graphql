@@ -97,7 +97,7 @@ export function withPreview<P extends object>(
       try {
         this.setState({ loading: true, error: false });
         const res = await client.query({
-          query: getIsolatedQuery(query, fieldName, typeName),
+          query: getIsolatedQuery(query as any, fieldName, typeName),
           fetchPolicy: 'network-only',
           variables: omitBy(variables, isObject),
         });

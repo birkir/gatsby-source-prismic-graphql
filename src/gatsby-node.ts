@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import fetch from 'node-fetch';
-import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
+import { sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
 import { fieldName, PrismicLink, typeName } from './utils';
 
 interface CreatePageInput {
@@ -22,8 +22,6 @@ interface PluginOptions {
   repositoryName: string;
   path?: null | string;
 }
-
-exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
 exports.sourceNodes = (ref: any, options: { [key: string]: any; accessToken?: string; repositoryName: string, linkOptions?: any }) => {
   options.fieldName = fieldName;
