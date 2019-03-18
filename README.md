@@ -12,12 +12,11 @@ yarn setup
 yarn dev
 ```
 
-
 ### Differences from `gatsby-source-prismic`
 
 This plugin will require [graphql enabled](https://prismic.io/blog/graphql-api-alpha-release) in your Prismic instance.
 
-The feature is currently in _alpha_ and not recommended in production. However that being said, by using Gatsby you have the garantee of production builds to never break as they are 
+The feature is currently in _alpha_ and not recommended in production. However that being said, by using Gatsby you have the garantee of production builds to never break as they are
 statically compiled.
 
 ## Installing
@@ -43,6 +42,7 @@ Add plugin to `gatsby-config.js`:
 ```
 
 Edit your `gatsby-browser.js`:
+
 ```js
 const { registerResolvers } = require('gatsby-source-prismic-graphql');
 const { linkResolver } = require('./src/utils/linkResolver');
@@ -132,23 +132,13 @@ export default withPreview(Page, query);
 You can use this plugin to dynamically fetch different component for your component. This is great for cases like pagination. See the following example:
 
 ```jsx
-import React from 'react'
+import React from 'react';
 import { graphql } from 'gatsby';
 
 export const query = graphql`
-  query allArticles(
-    $first: Int = 2
-    $last: Int
-    $after: String
-    $before: String
-  ) {
+  query allArticles($first: Int = 2, $last: Int, $after: String, $before: String) {
     prismic {
-      allArticles(
-        first: $first
-        last: $last
-        after: $after
-        before: $before
-      ) {
+      allArticles(first: $first, last: $last, after: $after, before: $before) {
         pageInfo {
           startCursor
           endCursor
@@ -167,34 +157,49 @@ export const query = graphql`
 `;
 
 export default class Article extends React.Component {
-
   static query = query;
 
   onNext = () => {
-    const { prismic, data: { prismic: { allArticles: { pageInfo }}} } = this.props;
+    const {
+      prismic,
+      data: {
+        prismic: {
+          allArticles: { pageInfo },
+        },
+      },
+    } = this.props;
     return prismic.load({ after: pageInfo.endCursor });
-  }
+  };
 
   onPrev = () => {
-    const { prismic, data: { prismic: { allArticles: { pageInfo }}} } = this.props;
+    const {
+      prismic,
+      data: {
+        prismic: {
+          allArticles: { pageInfo },
+        },
+      },
+    } = this.props;
     // Prismic uses cursor based pagination
     // But its actually just base64 encoded string if you want to maintain your own page state.
     // for example: const cursor = btoa(`arrayconnection:${index}`);
     return prismic.load({ before: pageInfo.startCursor, first: null, last: 2 });
-  }
+  };
 
   renderArticleEdge = ({ node }) => {
-    return <li key={node._meta.id}>{node.title[0].text}</li>
-  }
+    return <li key={node._meta.id}>{node.title[0].text}</li>;
+  };
 
   render() {
     const { edges } = this.props.data.prismic.allArticles;
-    return <>
-      <h1>List of articles</h1>
-      <ul>{edges.map(this.renderArticleEdge)}</ul>
-      <button onClick={this.onPrev}>prev</button>
-      <button onClick={this.onNext}>next</button>
-    </>
+    return (
+      <>
+        <h1>List of articles</h1>
+        <ul>{edges.map(this.renderArticleEdge)}</ul>
+        <button onClick={this.onPrev}>prev</button>
+        <button onClick={this.onNext}>next</button>
+      </>
+    );
   }
 }
 ```
@@ -204,16 +209,17 @@ export default class Article extends React.Component {
 You may have a case where you are trying to preview a page that hasn't been published yet. We included a special component resolver for these cases to help with this issue.
 
 Edit your `gatsby-browser.js`:
+
 ```js
 const { registerResolvers } = require('gatsby-source-prismic-graphql');
 const { linkResolver } = require('./src/utils/linkResolver');
 
-const componentResolver = (doc) => {
+const componentResolver = doc => {
   if (doc.type === 'article') {
     return require('./src/pages/article.js');
   }
   return () => null;
-}
+};
 
 registerResolvers(linkResolver, componentResolver);
 ```
@@ -232,7 +238,7 @@ registerResolvers(linkResolver, componentResolver);
 
 3. Once redirected to a page with the content, everything will load normally.
 
-   In the background, the plugin takes your  original gatsby graphql query, extracts the prismic subquery and uses it to make a graphql request to Prismic with a preview reference.
+   In the background, the plugin takes your original gatsby graphql query, extracts the prismic subquery and uses it to make a graphql request to Prismic with a preview reference.
 
    Once data is received, it will update the `data` prop with merged data from Prismic preview and re-render the component.
 
@@ -241,4 +247,3 @@ registerResolvers(linkResolver, componentResolver);
 This plugin does not have gatsby-plugin-sharp support.
 
 Please raise an issue on GitHub if you have any problems.
-
