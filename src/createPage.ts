@@ -1,4 +1,4 @@
-import { Dictionary } from './models/Dictionnary'
+import { Dictionary } from './models/Dictionary'
 import Preview from './utils/Preview'
 import URL from './utils/url'
 import PrismicPage from './utils/PrismicPage'
@@ -14,7 +14,7 @@ function validateOptions(options: any): PageOptions {
   return options as PageOptions
 }
 
-export function createPage(gatsbyCreatePage: any, queryStorage: QueryStorage, dictionnary: Dictionary, opts: any) {
+export function createPage(gatsbyCreatePage: any, queryStorage: QueryStorage, dictionary: Dictionary, opts: any) {
   const options = validateOptions(opts)
 
   const { data } = options.context
@@ -41,7 +41,7 @@ export function createPage(gatsbyCreatePage: any, queryStorage: QueryStorage, di
     delete customOptions.params
     delete customOptions.customType
 
-    dictionnary[options.pattern] = {
+    dictionary[options.pattern] = {
       componentPath: options.component,
       previewQuery,
       customType: options.customType,

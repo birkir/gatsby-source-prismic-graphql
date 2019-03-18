@@ -1,5 +1,5 @@
 import { createPage as prismicCreatePage } from './createPage'
-import { Dictionary } from './models/Dictionnary'
+import { Dictionary } from './models/Dictionary'
 import { QueryStorage } from './models/QueryStorage'
 import URL from './utils/url'
 
@@ -10,14 +10,14 @@ function prismicGraphQL(graphql: any, queryStorage: QueryStorage, strQuery: stri
 
 export function createPages(callback: (params: any) => void) {
 
-  let dictionnary: Dictionary = {}
+  let dictionary: Dictionary = {}
   let queryStorage: QueryStorage = {}
 
   return async ({ graphql, actions } : any) => {
     const { createPage } = actions
-    const customActions = Object.assign({}, actions, { createPrismicPage: prismicCreatePage.bind(null, createPage, queryStorage, dictionnary) })
+    const customActions = Object.assign({}, actions, { createPrismicPage: prismicCreatePage.bind(null, createPage, queryStorage, dictionary) })
     await callback({graphql: prismicGraphQL.bind(null, graphql, queryStorage), actions: customActions})
-    Object.entries(dictionnary).map(([urlPattern, { componentPath, previewQuery, customType }]) => {
+    Object.entries(dictionary).map(([urlPattern, { componentPath, previewQuery, customType }]) => {
       const fixURL = URL.extractFixURL(urlPattern)
       if(fixURL) {
         createPage({
