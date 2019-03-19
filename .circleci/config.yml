@@ -1,9 +1,13 @@
 version: 2
 
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:10
+
 jobs:
-  build:
-    docker:
-      - image: circleci/node:10
+  test:
+    <<: *defaults
     steps:
       - checkout
       - restore_cache:
@@ -21,3 +25,32 @@ jobs:
       - run: yarn run lerna bootstrap
       - run: yarn run build
       - run: yarn run test:prettier
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
+      - run:
+          name: Publish package
+          command: lerna publish --canary
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
+  deploy_canary:
+    jobs:
+      - test
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
