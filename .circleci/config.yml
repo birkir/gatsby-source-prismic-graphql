@@ -45,6 +45,9 @@ workflows:
   test:
     jobs:
       - test
+      filters:
+        branches:
+          ignore: master
   deploy_canary:
     jobs:
       - test

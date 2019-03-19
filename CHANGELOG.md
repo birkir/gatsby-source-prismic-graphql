@@ -5,8 +5,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 # 3.0.0-alpha.0 (2019-03-19)
 
-
 ### Bug Fixes
 
-* pageContext as variables by default ([0cd8d57](https://github.com/birkir/gatsby-source-prismic-graphql/commit/0cd8d57))
-* remove multiple graphql packages ([ecd1a09](https://github.com/birkir/gatsby-source-prismic-graphql/commit/ecd1a09))
+- pageContext as variables by default ([0cd8d57](https://github.com/birkir/gatsby-source-prismic-graphql/commit/0cd8d57))
+- remove multiple graphql packages ([ecd1a09](https://github.com/birkir/gatsby-source-prismic-graphql/commit/ecd1a09))
