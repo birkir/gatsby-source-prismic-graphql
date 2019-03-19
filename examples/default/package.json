@@ -1,6 +1,7 @@
 {
   "name": "gatsby-starter-default",
   "private": true,
+  "version": "0.0.0",
   "description": "A simple starter to get up and developing quickly with Gatsby",
   "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "dependencies": {
