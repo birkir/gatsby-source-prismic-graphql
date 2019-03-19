@@ -1,17 +1,11 @@
 import React from 'react';
+import { PluginOptions } from './interfaces/PluginOptions';
 
 interface OnRenderBodyArgs {
   setHeadComponents(args: React.ReactElement<any>[]): void;
 }
 
-interface IPluginOptions {
-  repositoryName: string;
-  accessToken?: null | string;
-  previews?: boolean;
-  linkResolver?: Function;
-}
-
-exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: IPluginOptions) => {
+exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: PluginOptions) => {
   let { repositoryName, accessToken, previews = false } = pluginOptions;
 
   // Remove accessToken if previews are disabled
