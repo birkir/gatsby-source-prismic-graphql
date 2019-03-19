@@ -34,6 +34,8 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run: rm -rf examples
+      - run: git add .
+      - run: git commit -m --no-verify
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
