@@ -46,7 +46,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
       - run:
           name: Publish package
-          command: yarn run lerna publish --canary --force-publish
+          command: yarn run lerna publish --canary --force-publish --yes
 
 workflows:
   version: 2
