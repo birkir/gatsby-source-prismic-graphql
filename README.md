@@ -93,6 +93,8 @@ If you create a new unpublished blogpost, `baz` it will be accessible for previe
 
 - /blogpost?uid=baz
 
+[See the example](https://github.com/birkir/gatsby-source-prismic-graphql/tree/master/examples/default)
+
 ```js
 {
   pages: [{
@@ -104,9 +106,35 @@ If you create a new unpublished blogpost, `baz` it will be accessible for previe
 }
 ```
 
+### StaticQuery
+
+You can use static queries like normal, but if you would like to preview them, use the `PreviewStaticQuery`.
+
+[See the example](https://github.com/birkir/gatsby-source-prismic-graphql/tree/master/examples/static-query)
+
+```js
+import { graphql } from 'gatsby';
+import { PreviewStaticQuery } from 'gatsby-source-prismic-graphql';
+
+export const Articles = () => (
+  <PreviewStaticQuery
+    query={graphql`
+      query {
+        prismic {
+          ...
+        }
+      }
+    `}
+    render={data => ...}
+  />
+);
+```
+
 ### Pagination and other dynamic fetching
 
 You can use this plugin to dynamically fetch different component for your component. This is great for cases like pagination. See the following example:
+
+[See the example](https://github.com/birkir/gatsby-source-prismic-graphql/tree/master/examples/pagination)
 
 ```jsx
 import React from 'react';

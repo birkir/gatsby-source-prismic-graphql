@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { sourceNodes } from 'gatsby-source-graphql/gatsby-node';
+import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
 import { babelParseToAst } from 'gatsby/dist/utils/babel-parse-to-ast';
 import { get } from 'lodash';
 import { fieldName, PrismicLink, typeName } from './utils';
@@ -21,6 +21,8 @@ const getRootQuery = (componentPath: string) => {
   }
   return null;
 };
+
+exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
 exports.sourceNodes = (
   ref: any,

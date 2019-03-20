@@ -72,6 +72,7 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
   };
 
   componentDidMount() {
+    console.log(this);
     const { props, uid, lang } = this;
     const { pageContext, options } = props;
     const cookies = getCookies();
@@ -93,6 +94,8 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
         })
         .catch(error => {
           this.setState({ loading: false, error });
+          console.error(error);
+          closeLoading();
         });
     }
   }

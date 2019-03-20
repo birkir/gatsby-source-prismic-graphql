@@ -5,32 +5,18 @@ interface OnRenderBodyArgs {
   setHeadComponents(args: React.ReactElement<any>[]): void;
 }
 
-exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, pluginOptions: PluginOptions) => {
-  let { repositoryName, accessToken, previews = false } = pluginOptions;
-
-  // Remove accessToken if previews are disabled
-  if (previews === false) {
-    accessToken = null;
-  }
+exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: PluginOptions) => {
+  const accessToken = options.previews ? null : options.accessToken;
 
   setHeadComponents([
-    <script
-      key={`plugin-source-prismic-graphql`}
-      dangerouslySetInnerHTML={{
-        __html: `window.___sourcePrismicGraphql = ${JSON.stringify({
-          repositoryName,
-          accessToken,
-          previews,
-        })}; `,
-      }}
-    />,
     <script
       key="prismic-config"
       dangerouslySetInnerHTML={{
         __html: `
             window.prismic = {
-              endpoint: 'https://${repositoryName}.prismic.io/api/v2'
+              endpoint: 'https://${options.repositoryName}.prismic.io/api/v2',
             };
+            window.prismicGatsbyOptions = ${JSON.stringify({ ...options, accessToken })};
           `,
       }}
     />,
