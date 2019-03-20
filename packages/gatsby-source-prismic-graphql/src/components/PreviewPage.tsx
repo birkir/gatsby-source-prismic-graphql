@@ -80,7 +80,7 @@ export default class PreviewPage extends React.Component<any> {
 
     const link = linkResolver(doc);
 
-    const urlWithQueryString = this.config.pages
+    const urlWithQueryString = (this.config.pages || [])
       .map((page: any) => {
         const keys: any = [];
         const re = pathToRegexp(page.match, keys);
