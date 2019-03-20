@@ -99,20 +99,10 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
         // @todo create language pages
       );
 
-      // used for development (client side)
+      // used for preview placeholder page
       createPage({
         path: page.path,
-        matchPath: page.match,
-        component: page.component,
-        context: {
-          rootQuery,
-          uid: '',
-        },
-      });
-
-      // used for production (server side)
-      createPage({
-        path: page.path,
+        matchPath: process.env.NODE_ENV === 'production' ? undefined : page.match,
         component: page.component,
         context: {
           rootQuery,

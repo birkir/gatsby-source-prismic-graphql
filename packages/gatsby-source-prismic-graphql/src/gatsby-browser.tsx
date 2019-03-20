@@ -20,7 +20,7 @@ interface WrapPageArgs {
 export const wrapPageElement = ({ element, props }: WrapPageArgs, options: any) => {
   if (props.pageContext.rootQuery || props.pageContext.prismicPreviewPage) {
     return (
-      <WrapPage options={options} {...props}>
+      <WrapPage key={props.location.key} options={options} {...props}>
         {element}
       </WrapPage>
     );

@@ -1,9 +1,25 @@
 import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
-import { isEmpty } from 'lodash';
+import { isEmpty, pick } from 'lodash';
+import Prismic from 'prismic-javascript';
 import React from 'react';
+import { fieldName, getCookies, typeName } from '../utils';
+import { createLoadingScreen } from '../utils/createLoadingScreen';
 import { getApolloClient } from '../utils/getApolloClient';
 import { parseQueryString } from '../utils/parseQueryString';
-import { createLoadingScreen } from '../utils/createLoadingScreen';
+import pathToRegexp from 'path-to-regexp';
+
+const getParams = ({ pageContext = {}, location = {} }: any) => {
+  const keys: any = [];
+  const re = pathToRegexp(pageContext.matchPath || '', keys);
+  const match = re.exec(location.pathname);
+  if (match) {
+    return keys.reduce((acc: any, value: any, index: number) => {
+      acc[value.name] = match[index + 1];
+      return acc;
+    }, {});
+  }
+  return {};
+};
 
 const getUid = ({ pageContext = {}, location = {} }: any) => {
   if (!isEmpty(pageContext.uid)) {
@@ -16,7 +32,27 @@ const getUid = ({ pageContext = {}, location = {} }: any) => {
     return qs.get('uid');
   }
 
-  return String(location.pathname).substr(String(pageContext.matchPath).length - 1);
+  const params = getParams({ pageContext, location });
+
+  if (params.uid) {
+    return params.uid;
+  }
+
+  return null;
+};
+
+const getLang = ({ pageContext = {}, location = {} }: any) => {
+  if (!isEmpty(pageContext.lang)) {
+    return pageContext.lang;
+  }
+
+  const qs = parseQueryString(String(location.search).substr(1));
+
+  if (qs.has('lang')) {
+    return qs.get('lang');
+  }
+
+  return null;
 };
 
 interface WrapPageState {
@@ -27,8 +63,7 @@ interface WrapPageState {
 
 export class WrapPage extends React.PureComponent<any, WrapPageState> {
   uid = getUid(this.props);
-
-  client = getApolloClient(this.props.options);
+  lang = getLang(this.props);
 
   state: WrapPageState = {
     data: this.props.data,
@@ -37,33 +72,39 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
   };
 
   componentDidMount() {
-    const { props, uid } = this;
+    const { props, uid, lang } = this;
+    const { pageContext, options } = props;
+    const cookies = getCookies();
+    const hasCookie = cookies.has(Prismic.experimentCookie) || cookies.has(Prismic.previewCookie);
 
-    if (props.pageContext.rootQuery && props.options.previews !== false) {
+    if (pageContext.rootQuery && options.previews !== false && hasCookie) {
       const closeLoading = createLoadingScreen();
-      this.load({ uid }).then(closeLoading);
+      const keys = [...(options.passContextKeys || []), 'uid', 'lang'];
+      const variables = pick({ ...pageContext, uid, lang }, keys);
+      this.setState({ loading: true });
+      this.load({ variables })
+        .then(res => {
+          this.setState({
+            loading: false,
+            error: null,
+            data: { ...this.state.data, prismic: res.data },
+          });
+          closeLoading();
+        })
+        .catch(error => {
+          this.setState({ loading: false, error });
+        });
     }
   }
 
-  load = (variables: any, query = this.props.pageContext.rootQuery) => {
-    this.setState({ loading: true });
-
-    return this.client
-      .query({
-        query: getIsolatedQuery(query, 'prismic', 'PRISMIC'),
+  load = ({ variables, query = this.props.pageContext.rootQuery }: any = {}) => {
+    return getApolloClient(this.props.options).then(client => {
+      return client.query({
+        query: getIsolatedQuery(query, fieldName, typeName),
         fetchPolicy: 'network-only',
         variables,
-      })
-      .then(res => {
-        this.setState({
-          loading: false,
-          error: null,
-          data: { ...this.state.data, prismic: res.data },
-        });
-      })
-      .catch(error => {
-        this.setState({ loading: false, error });
       });
+    });
   };
 
   render() {
