@@ -37,6 +37,12 @@ Add plugin to `gatsby-config.js`:
     accessToken: '...', // (optional)
     path: '/preview', // (optional, default: /preview)
     previews: true, // (optional, default: false)
+    pages: [{
+      type: 'Article',         // TypeName from prismic
+      match: '/blogpost/:uid', // Pages will be generated under this pattern
+      path: '/blogpost',       // Placeholder page for unpublished documents
+      component: require.resolve('./src/templates/article.js'),
+    }],
   }
 }
 ```
@@ -44,10 +50,10 @@ Add plugin to `gatsby-config.js`:
 Edit your `gatsby-browser.js`:
 
 ```js
-const { registerResolvers } = require('gatsby-source-prismic-graphql');
+const { registerLinkResolver } = require('gatsby-source-prismic-graphql');
 const { linkResolver } = require('./src/utils/linkResolver');
 
-registerResolvers(linkResolver);
+registerLinkResolver(linkResolver);
 ```
 
 ## Usage
@@ -71,7 +77,7 @@ export const query = graphql`
   }
 `
 
-const Page = ({ data }) => <>
+export default function Page({ data }) => <>
   <h1>{RichText.render(data.prismic.title)}</h1>
   <h2>{RichText.render(data.prismic.description)}</h1>
 </>
@@ -81,50 +87,33 @@ const Page = ({ data }) => <>
 
 You can enable previews by setting `options.previews = true` in `gatsby-config.js`.
 
-#### Assign graphql query to component
+### Generated pages
 
-By default, the plugin will wrap components with the preview decorator, but you will have to assign a proper query to the component.
+You can generate pages automatically by providing mapping configuration under the `pages` option.
 
-```jsx
-// Given the following query
-export const query = graphql`
-  query {
-    prismic {
-      ...
-    }
-  }
-`
+If you have two blog posts like `['foo', 'bar']`, it will generate the following URLs:
 
-const Page = ({ data }) => (...);
-Page.query = query; // <-- Assign with object property assignment
+- /blogpost/foo
+- /blogpost/bar
 
-// or
+If you create a new blogpost for example `baz` it will be accessible under:
 
-class Page extends React.Component {
-  static query = query; // <-- Assign with `static` class assignment
-  render() { ... }
+- /blogpost?uid=baz
+
+```js
+{
+  pages: [{
+    type: 'Article',
+    match: '/blogpost/:uid',
+    path: '/blogpost',
+    component: require.resolve('./src/templates/article.js'),
+  }, {
+    type: 'CustomPage',
+    match: '/:uid',
+    path: '/custompage',
+    component: require.resolve('./src/templates/page.js'),
+  }],
 }
-```
-
-#### Manual usage
-
-You can also have full control over your page components and use the built in higher order component like this:
-
-```jsx
-import React from 'react';
-import { withPreview } from 'gatsby-source-prismic-graphql';
-
-export const query = graphql`
-  query {
-    prismic {
-      ...
-    }
-  }
-`;
-
-const Page = ({ data }) => (...);
-
-export default withPreview(Page, query);
 ```
 
 ### Pagination and other dynamic fetching
@@ -157,8 +146,6 @@ export const query = graphql`
 `;
 
 export default class Article extends React.Component {
-  static query = query;
-
   onNext = () => {
     const {
       prismic,
@@ -183,7 +170,7 @@ export default class Article extends React.Component {
     // Prismic uses cursor based pagination
     // But its actually just base64 encoded string if you want to maintain your own page state.
     // for example: const cursor = btoa(`arrayconnection:${index}`);
-    return prismic.load({ before: pageInfo.startCursor, first: null, last: 2 });
+    return prismic.load({ variables: { before: pageInfo.startCursor, first: null, last: 2 } });
   };
 
   renderArticleEdge = ({ node }) => {
@@ -202,26 +189,6 @@ export default class Article extends React.Component {
     );
   }
 }
-```
-
-### Previewing non-existing page
-
-You may have a case where you are trying to preview a page that hasn't been published yet. We included a special component resolver for these cases to help with this issue.
-
-Edit your `gatsby-browser.js`:
-
-```js
-const { registerResolvers } = require('gatsby-source-prismic-graphql');
-const { linkResolver } = require('./src/utils/linkResolver');
-
-const componentResolver = doc => {
-  if (doc.type === 'article') {
-    return require('./src/pages/article.js');
-  }
-  return () => null;
-};
-
-registerResolvers(linkResolver, componentResolver);
 ```
 
 ## How this plugin works
