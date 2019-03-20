@@ -1,8 +1,9 @@
-import React from 'react';
 import { graphql, Link } from 'gatsby';
+import { linkResolver } from 'gatsby-source-prismic-graphql';
 import { get } from 'lodash';
 import { RichText } from 'prismic-reactjs';
-import { linkResolver } from 'gatsby-source-prismic-graphql';
+import React from 'react';
+import Layout from '../components/layout';
 
 export const query = graphql`
   query ArticleQuery($uid: String) {
@@ -38,11 +39,11 @@ const Article = props => {
   ));
 
   return (
-    <article>
+    <Layout>
       {!!title && RichText.render(title, linkResolver)}
       {body}
       <Link to="/">Back to index</Link>
-    </article>
+    </Layout>
   );
 };
 

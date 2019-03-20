@@ -108,24 +108,26 @@ If you create a new unpublished blogpost, `baz` it will be accessible for previe
 
 ### StaticQuery
 
-You can use static queries like normal, but if you would like to preview them, use the `PreviewStaticQuery`.
+You can use static queries like normal, but if you would like to preview them, use the `withPreview` function.
 
 [See the example](https://github.com/birkir/gatsby-source-prismic-graphql/tree/master/examples/static-query)
 
 ```js
-import { graphql } from 'gatsby';
-import { PreviewStaticQuery } from 'gatsby-source-prismic-graphql';
+import { StaticQuerygraphql } from 'gatsby';
+import { withPreview } from 'gatsby-source-prismic-graphql';
+
+const articlesQuery = graphql`
+  query {
+    prismic {
+      ...
+    }
+  }
+`;
 
 export const Articles = () => (
-  <PreviewStaticQuery
-    query={graphql`
-      query {
-        prismic {
-          ...
-        }
-      }
-    `}
-    render={data => ...}
+  <StaticQuery
+    query={articlesQuery}
+    render={withPreview(data => { ... }, articlesQuery)}
   />
 );
 ```

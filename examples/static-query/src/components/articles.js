@@ -1,6 +1,6 @@
 import React from 'react';
-import { graphql } from 'gatsby';
-import { PreviewStaticQuery } from 'gatsby-source-prismic-graphql';
+import { graphql, StaticQuery } from 'gatsby';
+import { withPreview } from 'gatsby-source-prismic-graphql';
 import { RichText } from 'prismic-reactjs';
 
 const query = graphql`
@@ -20,20 +20,23 @@ const query = graphql`
   }
 `;
 
+const renderArticles = data => {
+  return (
+    <>
+      <h1>List of articles</h1>
+      <ul>
+        {data.prismic.allArticles.edges.map(({ node }) => (
+          <li key={node._meta.uid}>{RichText.render(node.title)}</li>
+        ))}
+      </ul>
+    </>
+  );
+};
+
 export const Articles = () => {
   return (
-    <PreviewStaticQuery
-      query={query}
-      render={data => (
-        <>
-          <h1>List of articles</h1>
-          <ul>
-            {data.prismic.allArticles.edges.map(({ node }) => (
-              <li key={node._meta.uid}>{RichText.render(node.title)}</li>
-            ))}
-          </ul>
-        </>
-      )}
-    />
+    <>
+      <StaticQuery query={query} render={withPreview(renderArticles, query)} />
+    </>
   );
 };

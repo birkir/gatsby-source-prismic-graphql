@@ -1,26 +1,12 @@
-import fs from 'fs';
 import path from 'path';
-import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
-import { babelParseToAst } from 'gatsby/dist/utils/babel-parse-to-ast';
-import { get } from 'lodash';
+import {
+  onCreateWebpackConfig,
+  getRootQuery,
+  sourceNodes,
+} from 'gatsby-source-graphql-universal/gatsby-node';
 import { fieldName, PrismicLink, typeName } from './utils';
 import { PluginOptions } from './interfaces/PluginOptions';
 import pathToRegexp from 'path-to-regexp';
-
-const getRootQuery = (componentPath: string) => {
-  const content = fs.readFileSync(componentPath, 'utf-8');
-  const ast = babelParseToAst(content);
-  const exported = get(ast, 'program.body', []).filter(
-    (n: any) => n.type === 'ExportNamedDeclaration'
-  );
-  if (get(exported, '0.declaration.declarations.0.id.name') === 'query') {
-    const query = get(exported, '0.declaration.declarations.0.init.quasi.quasis.0.value.raw');
-    if (query) {
-      return query;
-    }
-  }
-  return null;
-};
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
@@ -38,15 +24,6 @@ exports.sourceNodes = (
     });
 
   return sourceNodes(ref, options);
-};
-
-exports.onCreatePage = ({ page, actions }: any, plugins: any) => {
-  const rootQuery = getRootQuery(page.componentPath);
-  if (rootQuery) {
-    page.context = page.context || {};
-    page.context.rootQuery = rootQuery;
-    actions.createPage(page);
-  }
 };
 
 exports.createPages = async ({ graphql, actions: { createPage } }: any, options: PluginOptions) => {

@@ -101,7 +101,7 @@ export default class PreviewPage extends React.Component<any> {
 
     const exists = (await fetch(link).then(res => res.status)) === 200;
 
-    if (!exists) {
+    if (!exists && urlWithQueryString) {
       window.location = urlWithQueryString;
     } else {
       window.location = link as any;

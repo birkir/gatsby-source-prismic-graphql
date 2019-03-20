@@ -1,6 +1,7 @@
 import { graphql, Link } from 'gatsby';
 import { get } from 'lodash';
 import React, { useEffect } from 'react';
+import Layout from '../components/layout';
 
 export const query = graphql`
   query ArticleList($first: Int = 2, $last: Int, $after: String, $before: String) {
@@ -48,7 +49,7 @@ const Home = props => {
   }, [page]);
 
   return (
-    <div>
+    <Layout>
       <h3>List of articles</h3>
       <ul>
         {data.allArticles.edges.map(({ node }) => (
@@ -63,7 +64,7 @@ const Home = props => {
       <button disabled={!data.allArticles.pageInfo.hasNextPage} onClick={onNextClick}>
         next page
       </button>
-    </div>
+    </Layout>
   );
 };
 
