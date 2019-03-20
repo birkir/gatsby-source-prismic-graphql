@@ -8,3 +8,5 @@ declare module 'jsonfn' {
 declare module 'gatsby-source-graphql/gatsby-node' {
   function sourceNodes(ref: any, options: any): any;
 }
+
+declare module 'gatsby/dist/utils/babel-parse-to-ast';

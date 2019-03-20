@@ -22,8 +22,8 @@ jobs:
           key: yarn-packages-{{ checksum "yarn.lock" }}
           paths:
             - ~/.cache/yarn
-      - run: yarn run lerna bootstrap
-      - run: yarn run build
+      - run: yarn run setup
+      - run: yarn run test
       - run: yarn run test:prettier
       - persist_to_workspace:
           root: ~/repo
@@ -33,17 +33,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/repo
-      # - run: rm -rf examples
-      # - run: git config --global user.email "you@example.com"
-      # - run: git config --global user.name "Your Name"
-      # - run: git add .
-      # - run: git commit -m --no-verify
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
-      - run:
-          name: Authenticate with registry 2
-          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
       - run:
           name: Publish package
           command: yarn run lerna publish --canary --force-publish --yes

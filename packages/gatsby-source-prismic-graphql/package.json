@@ -6,7 +6,8 @@
   "main": "index.js",
   "types": "./types/index.d.ts",
   "scripts": {
-    "clean": "rimraf {interfaces,types,utils,*.js}",
+    "start": "babel src --out-dir ./ --extensions '.ts,.tsx' --watch",
+    "clean": "rimraf {interfaces,types,components,utils,*.js}",
     "build": "tsc --emitDeclarationOnly && babel src --out-dir ./ --extensions '.ts,.tsx'",
     "prepare": "yarn clean && cross-env NODE_ENV=production yarn build"
   },
@@ -16,6 +17,7 @@
   },
   "files": [
     "*.js",
+    "components",
     "utils",
     "interfaces",
     "types"
@@ -41,6 +43,7 @@
     "apollo-link-context": "^1.0.17",
     "gatsby-source-graphql": "^2.0.15",
     "gatsby-source-graphql-universal": "^2.0.4",
+    "path-to-regexp": "^3.0.0",
     "prismic-javascript": "^2.0.1",
     "styled-components": "^4.1.3",
     "traverse": "^0.6.6",

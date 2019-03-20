@@ -8,13 +8,14 @@
     ]
   },
   "scripts": {
-    "setup": "lerna bootstrap; yarn run link",
+    "setup": "lerna bootstrap; yarn run link; yarn build",
     "link": "lerna exec --no-private -- yarn link",
     "unlink": "lerna exec --no-private -- yarn unlink",
     "clean": "lerna run clean",
-    "build": "lerna run build",
-    "dev": "cd examples/default; yarn develop",
+    "start": "lerna run start --ignore \"@examples/*\" --stream",
+    "build": "lerna run build --ignore \"@examples/*\"",
     "prettier": "prettier --write '**/*.{json,md,js,jsx,ts,tsx}'",
+    "test": "lerna run build --scope \"@examples/*\"",
     "test:prettier": "prettier --list-different '**/*.{json,md,js,jsx,ts,tsx}'"
   },
   "husky": {

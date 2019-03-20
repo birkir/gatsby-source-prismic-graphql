@@ -1,45 +1,30 @@
 import React from 'react';
 import Prismic from 'prismic-javascript';
-import { qs, linkResolver, getCookies } from '../utils';
+import { linkResolver, getCookies } from '../utils';
+import { parseQueryString } from '../utils/parseQueryString';
+import pathToRegexp from 'path-to-regexp';
 
-interface IVariation {
+interface Variation {
   id: string;
   label: string;
   ref: string;
 }
 
-export class PreviewPage extends React.Component<any> {
-  public url: URL | undefined;
-  public qs = new Map();
-
-  public state = {
-    component: null,
-  };
-
+export default class PreviewPage extends React.Component<any> {
   public componentDidMount() {
-    this.setup();
-  }
-
-  setup() {
-    if (typeof window !== 'undefined') {
-      this.url = new URL(window.location.toString());
-      this.qs = qs(String(this.url.search).substr(1));
-      this.preview();
-    }
+    this.preview();
   }
 
   get config() {
-    if (typeof window !== 'undefined') {
-      const config = (window as any).___sourcePrismicGraphql;
-      return config || {};
-    }
-    return {};
+    return this.props.prismic.options;
   }
 
   public async preview() {
-    const token = this.qs.get('token');
-    const experiment = this.qs.get('experiment');
-    const documentId = this.qs.get('documentId');
+    const { location } = this.props;
+    const qs = parseQueryString(String(location.search).substr(1));
+    const token = qs.get('token');
+    const experiment = qs.get('experiment');
+    const documentId = qs.get('documentId');
 
     // Expiration date of cookie
     const now = new Date();
@@ -59,7 +44,7 @@ export class PreviewPage extends React.Component<any> {
 
       return this.redirect(doc);
     } else if (experiment) {
-      const runningVariations: IVariation[] = [];
+      const runningVariations: Variation[] = [];
 
       if (api.experiments.running && api.experiments.running.length) {
         runningVariations.concat(
@@ -94,12 +79,36 @@ export class PreviewPage extends React.Component<any> {
     }
 
     const link = linkResolver(doc);
-    (window as any).location = link;
+
+    const urlWithQueryString = this.config.pages
+      .map((page: any) => {
+        const keys: any = [];
+        const re = pathToRegexp(page.match, keys);
+        const match = re.exec(link);
+        const delimiter = (str: string) => (str.indexOf('?') === -1 ? '?' : '&');
+        if (match) {
+          return match
+            .slice(1)
+            .reduce(
+              (acc, value, i) =>
+                acc + (keys[i] ? `${delimiter(acc)}${keys[i].name}=${value}` : value),
+              page.path
+            );
+        }
+        return null;
+      })
+      .find((n: any) => !!n);
+
+    const exists = (await fetch(link).then(res => res.status)) === 200;
+
+    if (!exists) {
+      window.location = urlWithQueryString;
+    } else {
+      window.location = link as any;
+    }
   };
 
   public render() {
     return null;
   }
 }
-
-export default PreviewPage;

@@ -2,6 +2,7 @@ import { setContext } from 'apollo-link-context';
 import { HttpLink } from 'apollo-link-http';
 import { HttpOptions } from 'apollo-link-http-common';
 import Prismic from 'prismic-javascript';
+import { parseQueryString } from './parseQueryString';
 
 interface IPrismicLinkArgs extends HttpOptions {
   uri: string;
@@ -16,27 +17,13 @@ export const typeName = 'PRISMIC';
 
 // keep link resolver function
 export let linkResolver: (doc: any) => string = () => '/';
-export let Component404: () => React.Component;
-
-export function qs(qs: string = '', delimiter: string = '&'): Map<string, string> {
-  return new Map(
-    qs.split(delimiter).map(item => {
-      const [key, value] = item.split('=').map(part => decodeURIComponent(part.trim()));
-      return [key, value] as [string, string];
-    })
-  );
-}
 
 export function registerLinkResolver(link: typeof linkResolver) {
   linkResolver = link;
 }
 
-export function register404(component: () => React.Component) {
-  Component404 = component;
-}
-
 export function getCookies() {
-  return qs(document.cookie, ';');
+  return parseQueryString(document.cookie, ';');
 }
 
 /**
