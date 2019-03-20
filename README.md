@@ -9,7 +9,11 @@ git clone git@github.com:birkir/gatsby-source-prismic-graphql.git
 cd gatsby-source-prismic-graphql
 yarn install
 yarn setup
-yarn dev
+yarn start
+
+# select example to work with
+cd examples/default
+yarn start
 ```
 
 ### Differences from `gatsby-source-prismic`
