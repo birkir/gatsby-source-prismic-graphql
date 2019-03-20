@@ -42,7 +42,6 @@
   "dependencies": {
     "apollo-link-context": "^1.0.17",
     "gatsby-source-graphql": "^2.0.15",
-    "gatsby-source-graphql-universal": "^3.0.3",
     "path-to-regexp": "^3.0.0",
     "prismic-javascript": "^2.0.1",
     "styled-components": "^4.1.3",

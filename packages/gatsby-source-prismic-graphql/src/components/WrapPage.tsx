@@ -76,6 +76,21 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
     const { pageContext, options } = props;
     const cookies = getCookies();
     const hasCookie = cookies.has(Prismic.experimentCookie) || cookies.has(Prismic.previewCookie);
+    const child = props.children as any;
+
+    if (child && child.type) {
+      if (child.type.query && child.type.query.source) {
+        pageContext.rootQuery = child.type.query.source;
+      }
+
+      if (child.type.fragments && Array.isArray(child.type.fragments)) {
+        child.type.fragments.forEach((fragment: any) => {
+          if (fragment && fragment.source) {
+            pageContext.rootQuery = `${pageContext.rootQuery} ${fragment.source}`;
+          }
+        });
+      }
+    }
 
     if (pageContext.rootQuery && options.previews !== false && hasCookie) {
       const closeLoading = createLoadingScreen();

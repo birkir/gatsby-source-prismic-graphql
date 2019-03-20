@@ -132,6 +132,56 @@ export const Articles = () => (
 );
 ```
 
+### useStaticQuery
+
+No support yet.
+
+### Fragments
+
+Fragments are supported for both page queries and static queries.
+
+**Page components**:
+
+```jsx
+import { graphql } from 'gatsby';
+
+const fragmentX = graphql` fragment X on Y { ... } `;
+
+export const query = graphql`
+  query {
+    ...X
+  }
+`;
+
+const MyPage = (data) => { ... };
+MyPage.fragments = [fragmentX];
+
+export default MyPage;
+```
+
+**StaticQuery**:
+
+```jsx
+import { StaticQuery, graphql } from 'gatsby';
+import { withPreview } from 'gatsby-source-prismic-graphql';
+
+const fragmentX = graphql` fragment X on Y { ... } `;
+
+export const query = graphql`
+  query {
+    ...X
+  }
+`;
+
+export default () => (
+  <StaticQuery
+    query={query}
+    render={withPreview(data => { ... }, query, [fragmentX])}
+  />
+);
+
+```
+
 ### Pagination and other dynamic fetching
 
 You can use this plugin to dynamically fetch different component for your component. This is great for cases like pagination. See the following example:
@@ -215,8 +265,6 @@ export default class Article extends React.Component {
 
    It will automatically set cookies based on the query parameters and attempt to find the correct page to redirect to with your linkResolver.
 
-   If the linkResolver will not find a page, it will attempt to use the `componentResolver` to render the correct page inline.
-
 2. It uses a different `babel-plugin-remove-graphql-queries` on the client.
 
    The modified plugin emits your graphql queries as string so they can be read and re-used on the client side by the plugin.
@@ -246,3 +294,14 @@ yarn start
 This plugin does not have gatsby-plugin-sharp support.
 
 Please raise an issue on GitHub if you have any problems.
+
+### My page graphql query does not hot-reload for previews
+
+This is a Gatsby limitation. You can bypass this limitation by adding the following:
+
+```jsx
+export const query = graphql` ... `;
+const MyPage = () => { ... };
+
+MyPage.query = query; // <-- set the query manually to allow hot-reload.
+```

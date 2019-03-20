@@ -10,6 +10,15 @@ import pathToRegexp from 'path-to-regexp';
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
+exports.onCreatePage = ({ page, actions }: any) => {
+  const rootQuery = getRootQuery(page.componentPath);
+  page.context = page.context || {};
+  if (rootQuery) {
+    page.context.rootQuery = rootQuery;
+    actions.createPage(page);
+  }
+};
+
 exports.sourceNodes = (
   ref: any,
   options: { [key: string]: any; accessToken?: string; repositoryName: string }
