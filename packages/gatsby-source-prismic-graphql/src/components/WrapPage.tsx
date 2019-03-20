@@ -55,6 +55,15 @@ const getLang = ({ pageContext = {}, location = {} }: any) => {
   return null;
 };
 
+const queryOrSource = (obj: any) => {
+  if (typeof obj === 'string') {
+    return obj;
+  } else if (obj.source) {
+    return String(obj.source);
+  }
+  return null;
+};
+
 interface WrapPageState {
   data: any;
   loading: boolean;
@@ -71,26 +80,30 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
     error: null,
   };
 
+  getQuery() {
+    const child = this.props.children as any;
+    let query = this.props.pageContext.rootQuery || '';
+
+    if (child && child.type) {
+      if (child.type.query) {
+        query = queryOrSource(child.type.query);
+      }
+
+      if (child.type.fragments && Array.isArray(child.type.fragments)) {
+        child.type.fragments.forEach((fragment: any) => {
+          query += queryOrSource(fragment);
+        });
+      }
+    }
+
+    return query;
+  }
+
   componentDidMount() {
     const { props, uid, lang } = this;
     const { pageContext, options } = props;
     const cookies = getCookies();
     const hasCookie = cookies.has(Prismic.experimentCookie) || cookies.has(Prismic.previewCookie);
-    const child = props.children as any;
-
-    if (child && child.type) {
-      if (child.type.query && child.type.query.source) {
-        pageContext.rootQuery = child.type.query.source;
-      }
-
-      if (child.type.fragments && Array.isArray(child.type.fragments)) {
-        child.type.fragments.forEach((fragment: any) => {
-          if (fragment && fragment.source) {
-            pageContext.rootQuery = `${pageContext.rootQuery} ${fragment.source}`;
-          }
-        });
-      }
-    }
 
     if (pageContext.rootQuery && options.previews !== false && hasCookie) {
       const closeLoading = createLoadingScreen();
@@ -114,12 +127,23 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
     }
   }
 
-  load = ({ variables, query = this.props.pageContext.rootQuery }: any = {}) => {
+  load = ({ variables, query, fragments = [], ...rest }: any = {}) => {
+    if (!query) {
+      query = this.getQuery();
+    } else {
+      query = queryOrSource(query);
+    }
+
+    fragments.forEach((fragment: any) => {
+      query += queryOrSource(fragment);
+    });
+
     return getApolloClient(this.props.options).then(client => {
       return client.query({
         query: getIsolatedQuery(query, fieldName, typeName),
         fetchPolicy: 'network-only',
         variables,
+        ...rest,
       });
     });
   };

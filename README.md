@@ -140,6 +140,8 @@ No support yet.
 
 Fragments are supported for both page queries and static queries.
 
+[See the example](https://github.com/birkir/gatsby-source-prismic-graphql/tree/master/examples/fragments)
+
 **Page components**:
 
 ```jsx
@@ -193,18 +195,11 @@ import React from 'react';
 import { graphql } from 'gatsby';
 
 export const query = graphql`
-  query allArticles($first: Int = 2, $last: Int, $after: String, $before: String) {
+  query Example($limit: Int) {
     prismic {
-      allArticles(first: $first, last: $last, after: $after, before: $before) {
-        pageInfo {
-          startCursor
-          endCursor
-        }
+      allArticles(first: $limit) {
         edges {
           node {
-            _meta {
-              id
-            }
             title
           }
         }
@@ -213,49 +208,18 @@ export const query = graphql`
   }
 `;
 
-export default class Article extends React.Component {
-  onNext = () => {
-    const {
-      prismic,
-      data: {
-        prismic: {
-          allArticles: { pageInfo },
-        },
-      },
-    } = this.props;
-    return prismic.load({ variables: { after: pageInfo.endCursor } });
-  };
+export default function Example({ data, prismic }) {
+  const handleClick = () =>
+    prismic.load({
+      variables: { limit: 100 },
+      query, // (optional)
+      fragments: [], // (optional)
+    });
 
-  onPrev = () => {
-    const {
-      prismic,
-      data: {
-        prismic: {
-          allArticles: { pageInfo },
-        },
-      },
-    } = this.props;
-    // Prismic uses cursor based pagination
-    // But its actually just base64 encoded string if you want to maintain your own page state.
-    // for example: const cursor = btoa(`arrayconnection:${index}`);
-    return prismic.load({ variables: { before: pageInfo.startCursor, first: null, last: 2 } });
-  };
-
-  renderArticleEdge = ({ node }) => {
-    return <li key={node._meta.id}>{node.title[0].text}</li>;
-  };
-
-  render() {
-    const { edges } = this.props.data.prismic.allArticles;
-    return (
-      <>
-        <h1>List of articles</h1>
-        <ul>{edges.map(this.renderArticleEdge)}</ul>
-        <button onClick={this.onPrev}>prev</button>
-        <button onClick={this.onNext}>next</button>
-      </>
-    );
-  }
+  return (
+    // ... data
+    <button onClick={handleClick}>load more</button>
+  );
 }
 ```
 
