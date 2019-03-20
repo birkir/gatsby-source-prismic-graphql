@@ -2,20 +2,6 @@
 
 Source data from Prismic with GraphQL
 
-## Development
-
-```
-git clone git@github.com:birkir/gatsby-source-prismic-graphql.git
-cd gatsby-source-prismic-graphql
-yarn install
-yarn setup
-yarn start
-
-# select example to work with
-cd examples/default
-yarn start
-```
-
 ### Differences from `gatsby-source-prismic`
 
 This plugin will require [graphql enabled](https://prismic.io/blog/graphql-api-alpha-release) in your Prismic instance.
@@ -41,10 +27,11 @@ Add plugin to `gatsby-config.js`:
     accessToken: '...', // (optional)
     path: '/preview', // (optional, default: /preview)
     previews: true, // (optional, default: false)
-    pages: [{
+    refetchInterval: 60, // (optional, default: null)
+    pages: [{ // (optional)
       type: 'Article',         // TypeName from prismic
-      match: '/blogpost/:uid', // Pages will be generated under this pattern
-      path: '/blogpost',       // Placeholder page for unpublished documents
+      match: '/article/:uid',  // Pages will be generated under this pattern
+      path: '/article',        // Placeholder page for unpublished documents
       component: require.resolve('./src/templates/article.js'),
     }],
   }
@@ -89,18 +76,20 @@ export default function Page({ data }) => <>
 
 ### Prismic Previews
 
-You can enable previews by setting `options.previews = true` in `gatsby-config.js`.
+Previews are enabled by default.
+
+[Read how to enable previews](https://user-guides.prismic.io/preview/how-to-set-up-a-preview/how-to-set-up-a-preview) in your prismic instance.
 
 ### Generated pages
 
 You can generate pages automatically by providing mapping configuration under the `pages` option.
 
-If you have two blog posts like `['foo', 'bar']`, it will generate the following URLs:
+If you have two blog posts like `foo`, `bar`, it will generate the following URLs:
 
 - /blogpost/foo
 - /blogpost/bar
 
-If you create a new blogpost for example `baz` it will be accessible under:
+If you create a new unpublished blogpost, `baz` it will be accessible for preview under:
 
 - /blogpost?uid=baz
 
@@ -111,11 +100,6 @@ If you create a new blogpost for example `baz` it will be accessible under:
     match: '/blogpost/:uid',
     path: '/blogpost',
     component: require.resolve('./src/templates/article.js'),
-  }, {
-    type: 'CustomPage',
-    match: '/:uid',
-    path: '/custompage',
-    component: require.resolve('./src/templates/page.js'),
   }],
 }
 ```
@@ -159,7 +143,7 @@ export default class Article extends React.Component {
         },
       },
     } = this.props;
-    return prismic.load({ after: pageInfo.endCursor });
+    return prismic.load({ variables: { after: pageInfo.endCursor } });
   };
 
   onPrev = () => {
@@ -212,6 +196,20 @@ export default class Article extends React.Component {
    In the background, the plugin takes your original gatsby graphql query, extracts the prismic subquery and uses it to make a graphql request to Prismic with a preview reference.
 
    Once data is received, it will update the `data` prop with merged data from Prismic preview and re-render the component.
+
+## Development
+
+```bash
+git clone git@github.com:birkir/gatsby-source-prismic-graphql.git
+cd gatsby-source-prismic-graphql
+yarn install
+yarn setup
+yarn start
+
+# select example to work with
+cd examples/default
+yarn start
+```
 
 ## Issues and Troubleshooting
 
