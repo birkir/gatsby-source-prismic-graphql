@@ -57,9 +57,9 @@ const getLang = ({ pageContext = {}, location = {} }: any) => {
 
 const queryOrSource = (obj: any) => {
   if (typeof obj === 'string') {
-    return obj;
+    return obj.replace(/\s+/g, ' ');
   } else if (obj.source) {
-    return String(obj.source);
+    return String(obj.source).replace(/\s+/g, ' ');
   }
   return null;
 };
@@ -82,11 +82,11 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
 
   getQuery() {
     const child = this.props.children as any;
-    let query = this.props.pageContext.rootQuery || '';
+    let query = queryOrSource(this.props.pageContext.rootQuery) || '';
 
     if (child && child.type) {
       if (child.type.query) {
-        query = queryOrSource(child.type.query);
+        query = queryOrSource(child.type.query) || '';
       }
 
       if (child.type.fragments && Array.isArray(child.type.fragments)) {
@@ -100,17 +100,14 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
   }
 
   componentDidMount() {
-    const { props, uid, lang } = this;
-    const { pageContext, options } = props;
+    const { pageContext, options } = this.props;
     const cookies = getCookies();
     const hasCookie = cookies.has(Prismic.experimentCookie) || cookies.has(Prismic.previewCookie);
 
     if (pageContext.rootQuery && options.previews !== false && hasCookie) {
       const closeLoading = createLoadingScreen();
-      const keys = [...(options.passContextKeys || []), 'uid', 'lang'];
-      const variables = pick({ ...pageContext, uid, lang }, keys);
       this.setState({ loading: true });
-      this.load({ variables })
+      this.load()
         .then(res => {
           this.setState({
             loading: false,
@@ -127,7 +124,10 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
     }
   }
 
-  load = ({ variables, query, fragments = [], ...rest }: any = {}) => {
+  load = ({ variables = {}, query, fragments = [], ...rest }: any = {}) => {
+    const { props, uid, lang } = this;
+    const { pageContext, options } = props;
+
     if (!query) {
       query = this.getQuery();
     } else {
@@ -137,6 +137,9 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
     fragments.forEach((fragment: any) => {
       query += queryOrSource(fragment);
     });
+
+    const keys = [...(options.passContextKeys || []), 'uid', 'lang'];
+    variables = { ...pick({ ...pageContext, uid, lang }, keys), ...variables };
 
     return getApolloClient(this.props.options).then(client => {
       return client.query({
