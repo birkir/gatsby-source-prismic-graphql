@@ -23,12 +23,12 @@ export const query = graphql`
 `;
 
 export default function Home(props) {
-  const { column_title } = get(props.data, 'prismic.allHomepages.edges.0.node', {});
+  const title = get(props.data, 'prismic.allHomepages.edges.0.node.column_title', []);
   const lang = get(props.pageContext, 'alternateLanguages.0.lang', '').replace('en-us', '');
 
   return (
     <Layout>
-      {RichText.render(column_title)}
+      {RichText.render(title)}
       <Link to={`/${lang}`}>Click here for alternative language</Link>
     </Layout>
   );
