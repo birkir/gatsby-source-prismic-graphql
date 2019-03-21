@@ -1,59 +1,12 @@
 import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
-import { isEmpty, pick } from 'lodash';
+import { pick } from 'lodash';
+import pathToRegexp from 'path-to-regexp';
 import Prismic from 'prismic-javascript';
 import React from 'react';
 import { fieldName, getCookies, typeName } from '../utils';
 import { createLoadingScreen } from '../utils/createLoadingScreen';
 import { getApolloClient } from '../utils/getApolloClient';
 import { parseQueryString } from '../utils/parseQueryString';
-import pathToRegexp from 'path-to-regexp';
-
-const getParams = ({ pageContext = {}, location = {} }: any) => {
-  const keys: any = [];
-  const re = pathToRegexp(pageContext.matchPath || '', keys);
-  const match = re.exec(location.pathname);
-  if (match) {
-    return keys.reduce((acc: any, value: any, index: number) => {
-      acc[value.name] = match[index + 1];
-      return acc;
-    }, {});
-  }
-  return {};
-};
-
-const getUid = ({ pageContext = {}, location = {} }: any) => {
-  if (!isEmpty(pageContext.uid)) {
-    return pageContext.uid;
-  }
-
-  const qs = parseQueryString(String(location.search).substr(1));
-
-  if (qs.has('uid')) {
-    return qs.get('uid');
-  }
-
-  const params = getParams({ pageContext, location });
-
-  if (params.uid) {
-    return params.uid;
-  }
-
-  return null;
-};
-
-const getLang = ({ pageContext = {}, location = {} }: any) => {
-  if (!isEmpty(pageContext.lang)) {
-    return pageContext.lang;
-  }
-
-  const qs = parseQueryString(String(location.search).substr(1));
-
-  if (qs.has('lang')) {
-    return qs.get('lang');
-  }
-
-  return null;
-};
 
 const queryOrSource = (obj: any) => {
   if (typeof obj === 'string') {
@@ -71,14 +24,37 @@ interface WrapPageState {
 }
 
 export class WrapPage extends React.PureComponent<any, WrapPageState> {
-  uid = getUid(this.props);
-  lang = getLang(this.props);
-
   state: WrapPageState = {
     data: this.props.data,
     loading: false,
     error: null,
   };
+
+  keys = ['uid', 'id', 'lang'];
+
+  get params() {
+    const params: any = { ...this.props.pageContext };
+
+    const keys: any = [];
+    const re = pathToRegexp(this.props.pageContext.matchPath || '', keys);
+    const match = re.exec(this.props.location.pathname);
+    if (match) {
+      keys.forEach((value: any, index: number) => {
+        if (!params[value.name]) {
+          params[value.name] = match[index + 1];
+        }
+      });
+    }
+
+    const qs = parseQueryString(String(this.props.location.search).substr(1));
+    this.keys.forEach((key: string) => {
+      if (!params[key] && qs.has(key)) {
+        params[key] = qs.get(key);
+      }
+    });
+
+    return params;
+  }
 
   getQuery() {
     const child = this.props.children as any;
@@ -125,9 +101,6 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
   }
 
   load = ({ variables = {}, query, fragments = [], ...rest }: any = {}) => {
-    const { props, uid, lang } = this;
-    const { pageContext, options } = props;
-
     if (!query) {
       query = this.getQuery();
     } else {
@@ -138,12 +111,12 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
       query += queryOrSource(fragment);
     });
 
-    const keys = [...(options.passContextKeys || []), 'uid', 'lang'];
-    variables = { ...pick({ ...pageContext, uid, lang }, keys), ...variables };
+    const keys = [...(this.props.options.passContextKeys || []), ...this.keys];
+    variables = { ...pick(this.params, keys), ...variables };
 
     return getApolloClient(this.props.options).then(client => {
       return client.query({
-        query: getIsolatedQuery(query, fieldName, typeName),
+        query: getIsolatedQuery(query, fieldName, typeName) || query,
         fetchPolicy: 'network-only',
         variables,
         ...rest,

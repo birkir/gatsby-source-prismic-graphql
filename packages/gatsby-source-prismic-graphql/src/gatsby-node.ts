@@ -56,11 +56,14 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
             edges {
               node {
                 _meta {
-                  uid
+                  id
                   lang
+                  uid
                   alternateLanguages {
-                    uid
+                    id
                     lang
+                    type
+                    uid
                   }
                 }
               }
@@ -74,18 +77,22 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       const toPath = pathToRegexp.compile(page.match);
       const rootQuery = getRootQuery(page.component);
 
-      data.prismic[queryKey].edges.forEach(
-        ({ node }: any) =>
-          createPage({
-            path: toPath(node._meta),
-            component: page.component,
-            context: {
-              rootQuery,
-              ...node._meta,
-            },
-          })
-        // @todo create language pages
-      );
+      data.prismic[queryKey].edges.forEach(({ node }: any) => {
+        const params = {
+          ...node._meta,
+          lang: node._meta.lang === options.defaultLang ? null : node._meta.lang,
+        };
+        const path = toPath(params);
+
+        createPage({
+          path: path === '' ? '/' : path,
+          component: page.component,
+          context: {
+            rootQuery,
+            ...node._meta,
+          },
+        });
+      });
 
       // used for preview placeholder page
       createPage({
@@ -94,7 +101,9 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
         component: page.component,
         context: {
           rootQuery,
+          id: '',
           uid: '',
+          lang: options.defaultLang,
         },
       });
     })
