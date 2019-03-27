@@ -113,7 +113,7 @@ You can use static queries like normal, but if you would like to preview them, u
 [See the example](https://github.com/birkir/gatsby-source-prismic-graphql/tree/master/examples/static-query)
 
 ```js
-import { StaticQuerygraphql } from 'gatsby';
+import { StaticQuery, graphql } from 'gatsby';
 import { withPreview } from 'gatsby-source-prismic-graphql';
 
 const articlesQuery = graphql`
