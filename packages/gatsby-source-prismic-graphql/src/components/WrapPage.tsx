@@ -1,5 +1,5 @@
 import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
-import { pick } from 'lodash';
+import { pick, get } from 'lodash';
 import pathToRegexp from 'path-to-regexp';
 import Prismic from 'prismic-javascript';
 import React from 'react';
@@ -36,8 +36,8 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
     const params: any = { ...this.props.pageContext };
 
     const keys: any = [];
-    const re = pathToRegexp(this.props.pageContext.matchPath || '', keys);
-    const match = re.exec(this.props.location.pathname);
+    const re = pathToRegexp(get(this.props.pageContext, 'matchPath', ''), keys);
+    const match = re.exec(get(this.props, 'location.pathname', ''));
     if (match) {
       keys.forEach((value: any, index: number) => {
         if (!params[value.name]) {
@@ -46,7 +46,7 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
       });
     }
 
-    const qs = parseQueryString(String(this.props.location.search).substr(1));
+    const qs = parseQueryString(String(get(this.props, 'location.search', '?')).substr(1));
     this.keys.forEach((key: string) => {
       if (!params[key] && qs.has(key)) {
         params[key] = qs.get(key);
@@ -58,7 +58,7 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
 
   getQuery() {
     const child = this.props.children as any;
-    let query = queryOrSource(this.props.pageContext.rootQuery) || '';
+    let query = queryOrSource(get(this.props.pageContext, 'rootQuery')) || '';
 
     if (child && child.type) {
       if (child.type.query) {
