@@ -88,7 +88,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
           // don't generate page in other than set language.
           return;
         }
-        
+
         createPage({
           path: path === '' ? '/' : path,
           component: page.component,
