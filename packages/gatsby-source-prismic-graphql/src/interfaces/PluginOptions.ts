@@ -3,6 +3,7 @@ interface Page {
   match: string;
   path: string;
   component: string;
+  lang?: string;
 }
 
 export interface PluginOptions {
