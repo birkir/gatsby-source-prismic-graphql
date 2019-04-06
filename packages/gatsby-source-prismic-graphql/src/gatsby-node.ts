@@ -84,6 +84,11 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
         };
         const path = toPath(params);
 
+        if (page.lang && page.lang !== node._meta.lang) {
+          // don't generate page in other than set language.
+          return;
+        }
+
         createPage({
           path: path === '' ? '/' : path,
           component: page.component,
