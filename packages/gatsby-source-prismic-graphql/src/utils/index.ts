@@ -26,6 +26,20 @@ export function getCookies() {
   return parseQueryString(document.cookie, ';');
 }
 
+export function fetchStripQueryWhitespace(url: string, ...args: any) {
+  const [hostname, qs = ''] = url.split('?');
+  const queryString = parseQueryString(qs);
+  if (queryString.has('query')) {
+    queryString.set('query', String(queryString.get('query')).replace(/\s+/g, ' '));
+  }
+  const updatedQs = Array.from(queryString)
+    .map(n => n.map(j => encodeURIComponent(j)).join('='))
+    .join('&');
+  const updatedUrl = `${hostname}?${updatedQs}`;
+
+  return fetch(updatedUrl, ...args);
+}
+
 /**
  * Apollo Link for Prismic
  * @param options Options
@@ -65,6 +79,7 @@ export function PrismicLink({ uri, accessToken, ...rest }: IPrismicLinkArgs) {
       uri,
       useGETForQueries: true,
       ...rest,
+      fetch: fetchStripQueryWhitespace,
     });
 
     return prismicLink.concat(httpLink);
