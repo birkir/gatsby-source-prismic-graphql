@@ -22,7 +22,7 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: Plugin
     />
   ];
 
-  if (options.omitPrismicScript === true) {
+  if (options.omitPrismicScript !== true) {
     components.push(
       <script
         key="prismic-script"
