@@ -7,7 +7,7 @@ interface OnRenderBodyArgs {
 
 exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: PluginOptions) => {
   const accessToken = options.previews ? null : options.accessToken;
-  
+
   const components = [
     <script
       key="prismic-config"
@@ -19,7 +19,7 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: Plugin
             window.prismicGatsbyOptions = ${JSON.stringify({ ...options, accessToken })};
           `,
       }}
-    />
+    />,
   ];
 
   if (options.omitPrismicScript !== true) {
@@ -31,6 +31,6 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: Plugin
       />
     );
   }
-  
+
   setHeadComponents(components);
 };
