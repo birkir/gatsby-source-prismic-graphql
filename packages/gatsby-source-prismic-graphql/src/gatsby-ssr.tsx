@@ -7,7 +7,8 @@ interface OnRenderBodyArgs {
 
 exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: PluginOptions) => {
   const accessToken = options.previews ? null : options.accessToken;
-
+  const omitScript = options.omitPrismicScript === true;
+  
   setHeadComponents([
     <script
       key="prismic-config"
@@ -20,7 +21,7 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: Plugin
           `,
       }}
     />,
-    <script
+    omitScript ? null : <script
       key="prismic-script"
       type="text/javascript"
       src="//static.cdn.prismic.io/prismic.min.js"
