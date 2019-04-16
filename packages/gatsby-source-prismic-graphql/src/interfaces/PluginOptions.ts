@@ -15,5 +15,5 @@ export interface PluginOptions {
   previewPath?: string;
   previews?: boolean;
   pages?: Page[];
-  omitPrismicScript: boolean;
+  omitPrismicScript?: boolean;
 }
