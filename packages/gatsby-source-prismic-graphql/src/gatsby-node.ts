@@ -1,9 +1,6 @@
 import path from 'path';
-import {
-  onCreateWebpackConfig,
-  getRootQuery,
-  sourceNodes,
-} from 'gatsby-source-graphql-universal/gatsby-node';
+import { getRootQuery } from 'gatsby-source-graphql-universal';
+import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
 import { fieldName, PrismicLink, typeName } from './utils';
 import { PluginOptions } from './interfaces/PluginOptions';
 import pathToRegexp from 'path-to-regexp';
