@@ -27,7 +27,6 @@ Add plugin to `gatsby-config.js`:
     accessToken: '...', // (optional)
     path: '/preview', // (optional, default: /preview)
     previews: true, // (optional, default: false)
-    refetchInterval: 60, // (optional, default: null)
     pages: [{ // (optional)
       type: 'Article',         // TypeName from prismic
       match: '/article/:uid',  // Pages will be generated under this pattern
