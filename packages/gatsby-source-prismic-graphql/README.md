@@ -29,7 +29,7 @@ Add plugin to `gatsby-config.js`:
     previews: true, // (optional, default: false)
     pages: [{ // (optional)
       type: 'Article',         // TypeName from prismic
-      match: '/article/:uid',  // Pages will be generated under this pattern
+      match: '/article/:uid',  // Pages will be generated under this pattern (optional)
       path: '/article',        // Placeholder page for unpublished documents
       component: require.resolve('./src/templates/article.js'),
     }],

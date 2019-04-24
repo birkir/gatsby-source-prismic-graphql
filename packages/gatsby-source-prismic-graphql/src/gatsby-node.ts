@@ -70,9 +70,13 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       }
     `;
 
-      const { data } = await graphql(query);
-      const toPath = pathToRegexp.compile(page.match);
+      const { data, errors } = await graphql(query);
+      const toPath = pathToRegexp.compile(page.match || page.path);
       const rootQuery = getRootQuery(page.component);
+
+      if (errors && errors.length) {
+        throw errors[0];
+      }
 
       data.prismic[queryKey].edges.forEach(({ node }: any) => {
         const params = {
