@@ -66,6 +66,10 @@ export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLi
           prismicRef = api.masterRef.ref;
         }
         const authorizationHeader = accessToken ? { Authorization: `Token ${accessToken}` } : {};
+
+        // if custom ref has been defined, then use that to pull content instead of default master ref
+        prismicRef = (typeof customRef === 'undefined' || customRef === null) ? prismicRef : customRef;
+
         return {
           headers: {
             ...options.headers,
