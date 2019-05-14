@@ -25,6 +25,7 @@ Add plugin to `gatsby-config.js`:
   options: {
     repositoryName: 'gatsby-source-prismic-test-site', // (required)
     accessToken: '...', // (optional)
+    prismicRef: '...', // (optional, if not used then defaults to master ref. This option is useful for a/b experiments)
     path: '/preview', // (optional, default: /preview)
     previews: true, // (optional, default: false)
     pages: [{ // (optional)
