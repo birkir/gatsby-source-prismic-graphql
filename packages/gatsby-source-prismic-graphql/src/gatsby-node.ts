@@ -18,7 +18,7 @@ exports.onCreatePage = ({ page, actions }: any) => {
 
 exports.sourceNodes = (
   ref: any,
-  options: { [key: string]: any; accessToken?: string; customRef?: string; repositoryName: string }
+  options: { [key: string]: any; accessToken?: string; prismicRef?: string; repositoryName: string }
 ) => {
   options.fieldName = fieldName;
   options.typeName = typeName;
