@@ -18,7 +18,7 @@ exports.onCreatePage = ({ page, actions }: any) => {
 
 exports.sourceNodes = (
   ref: any,
-  options: { [key: string]: any; accessToken?: string; repositoryName: string }
+  options: { [key: string]: any; accessToken?: string; prismicRef?: string; repositoryName: string }
 ) => {
   options.fieldName = fieldName;
   options.typeName = typeName;
@@ -27,6 +27,7 @@ exports.sourceNodes = (
       uri: `https://${options.repositoryName}.prismic.io/graphql`,
       credentials: 'same-origin',
       accessToken: options.accessToken,
+      customRef: options.prismicRef,
     });
 
   return sourceNodes(ref, options);

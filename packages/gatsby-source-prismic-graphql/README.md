@@ -25,6 +25,7 @@ Add plugin to `gatsby-config.js`:
   options: {
     repositoryName: 'gatsby-source-prismic-test-site', // (required)
     accessToken: '...', // (optional)
+    prismicRef: '...', // (optional, if not used then defaults to master ref. This option is useful for a/b experiments)
     path: '/preview', // (optional, default: /preview)
     previews: true, // (optional, default: false)
     pages: [{ // (optional)
@@ -221,6 +222,35 @@ export default function Example({ data, prismic }) {
   );
 }
 ```
+
+### Prismic.io content a/b experiments integration
+
+You can use this plugin in combination with Prismic's built-in experiments functionality, and a hosting service like Netlify, to run content a/b tests.
+
+Experiments in Prismic are basically branches of the core content, split into 'refs' similar to git branches.
+So if you want to get content from a certain experiment variation, you can pass the corresponding ref through to Prismic in your request,
+and it will return content based on that ref's variation.
+
+A/B experiments are tricky to implement in a static website though; a/b testing needs a way to dynamically serve up the different variations
+to different website visitors. This is at odds with the idea of a static, non-dynamic website.
+
+Fortunately, static hosting providers like Netlify allow you to run a/b tests at a routing level.
+This makes it possible for us to build multiple versions of our project using different source data, and then within Netlify
+split traffic to our different static variations.
+
+Therefore, we can use a/b experiments from Prismic in the following way:
+
+1. Setup an experiment in Prismic.
+
+2. Create a new git branch of your project which will be used to get content. You will need to create a separate git branch for each variation.
+
+3. In that git branch, edit/add the optional 'prismicRef' parameter (documented above). The value of this should be the ref of the variation this git branch is for.
+
+4. Push the newly created branch to your git repo.
+
+5. Now go to your static hosting provider (we'll use Netlify in this example), and setup split testing based on your git branches/Prismic variations.
+
+6. Now your static website will show different experimental variations of the content to different users! At this point the process is manual and non-ideal, but hopefully we'll be able to automate it more in the future.
 
 ## How this plugin works
 

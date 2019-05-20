@@ -9,6 +9,7 @@ interface Page {
 export interface PluginOptions {
   repositoryName: string;
   accessToken?: null | string;
+  prismicRef?: null | string;
   linkResolver?: Function;
   defaultLang?: string;
   passContextKeys?: string[];

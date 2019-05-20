@@ -7,6 +7,7 @@ import { parseQueryString } from './parseQueryString';
 interface IPrismicLinkArgs extends HttpOptions {
   uri: string;
   accessToken?: string;
+  customRef?: string;
   credentials?: string;
   useGETForQueries?: boolean;
 }
@@ -44,7 +45,7 @@ export function fetchStripQueryWhitespace(url: string, ...args: any) {
  * Apollo Link for Prismic
  * @param options Options
  */
-export function PrismicLink({ uri, accessToken, ...rest }: IPrismicLinkArgs) {
+export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLinkArgs) {
   const BaseURIReg = /^(https?:\/\/.+?\..+?\..+?)\/graphql\/?$/;
   const matches = uri.match(BaseURIReg);
   if (matches && matches[1]) {
@@ -65,6 +66,10 @@ export function PrismicLink({ uri, accessToken, ...rest }: IPrismicLinkArgs) {
           prismicRef = api.masterRef.ref;
         }
         const authorizationHeader = accessToken ? { Authorization: `Token ${accessToken}` } : {};
+
+        // if custom ref has been defined, then use that to pull content instead of default master ref
+        prismicRef = (typeof customRef === 'undefined' || customRef === null) ? prismicRef : customRef;
+
         return {
           headers: {
             ...options.headers,
