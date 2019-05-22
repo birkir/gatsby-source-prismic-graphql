@@ -31,7 +31,7 @@ export function fetchStripQueryWhitespace(url: string, ...args: any) {
   const [hostname, qs = ''] = url.split('?');
   const queryString = parseQueryString(qs);
   if (queryString.has('query')) {
-    queryString.set('query', String(queryString.get('query')).replace(/\s+/g, ' '));
+    queryString.set('query', String(queryString.get('query')).replace(/\#.*\n/g, '').replace(/\s+/g, ' '));
   }
   const updatedQs = Array.from(queryString)
     .map(n => n.map(j => encodeURIComponent(j)).join('='))
