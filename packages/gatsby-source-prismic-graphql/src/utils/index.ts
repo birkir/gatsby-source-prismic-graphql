@@ -31,7 +31,12 @@ export function fetchStripQueryWhitespace(url: string, ...args: any) {
   const [hostname, qs = ''] = url.split('?');
   const queryString = parseQueryString(qs);
   if (queryString.has('query')) {
-    queryString.set('query', String(queryString.get('query')).replace(/\#.*\n/g, '').replace(/\s+/g, ' '));
+    queryString.set(
+      'query',
+      String(queryString.get('query'))
+        .replace(/\#.*\n/g, '')
+        .replace(/\s+/g, ' ')
+    );
   }
   const updatedQs = Array.from(queryString)
     .map(n => n.map(j => encodeURIComponent(j)).join('='))
@@ -68,7 +73,8 @@ export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLi
         const authorizationHeader = accessToken ? { Authorization: `Token ${accessToken}` } : {};
 
         // if custom ref has been defined, then use that to pull content instead of default master ref
-        prismicRef = (typeof customRef === 'undefined' || customRef === null) ? prismicRef : customRef;
+        prismicRef =
+          typeof customRef === 'undefined' || customRef === null ? prismicRef : customRef;
 
         return {
           headers: {
