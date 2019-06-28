@@ -81,56 +81,35 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     },
   });
 
+  let edgesCollection: [any?] = [];
+
   // Helper that recursively creates 20 pages at a time for the given page type
   // (Prismic GraphQL queries only return up to 20 results per query)
-  async function createPageRecursively(
-    page: any,
-    endCursor: string = '',
-    lastEndCursor: string = ''
-  ) {
+  async function createPageRecursively(page: any, endCursor: string = '') {
     const pageType = `all${page.type}s`;
     const query = getPagesQuery({ pageType });
     const { data, errors } = await graphql(query, { after: endCursor });
-    const toPath = pathToRegexp.compile(page.match || page.path);
     const rootQuery = getRootQuery(page.component);
 
     if (errors && errors.length) {
       throw errors[0];
     }
 
-    // Cycle through each page returned from query...
-    data.prismic[pageType].edges.forEach(({ cursor, node }: any, index: number) => {
-      const params = {
-        ...node._meta,
-        lang: node._meta.lang === options.defaultLang ? null : node._meta.lang,
-      };
-      const path = toPath(params);
+    data.prismic[pageType].edges.forEach((edge: any) => (edge.endCursor = endCursor));
 
-      if (page.lang && page.lang !== node._meta.lang) {
-        return; // don't generate page in other than set language
-      }
-
-      // ...and create the page
-      createPage({
-        path: path === '' ? '/' : path,
-        component: page.component,
-        context: {
-          rootQuery,
-          ...node._meta,
-          cursor,
-          // would it be better to also include cursor or uid for prev and next pages?
-          lastPageEndCursor: index === 0 ? lastEndCursor : endCursor, // for paging back
-        },
-      });
-    });
+    // Add pages to list
+    edgesCollection = [...edgesCollection, ...data.prismic[pageType].edges] as [any?];
 
     const hasNextPage = data.prismic[pageType].pageInfo.hasNextPage;
     const newEndCursor = data.prismic[pageType].pageInfo.endCursor;
 
     if (hasNextPage) {
-      await createPageRecursively(page, newEndCursor, endCursor);
+      await createPageRecursively(page, newEndCursor);
     } else {
       // If there are no more pages, create the preview page for this page type
+      // TODO: create pages from edges
+      createPagesFromEdges(createPage, edgesCollection, rootQuery, options, page);
+      edgesCollection = []; // empty out the array for the next page type
       createPage({
         path: page.path,
         matchPath: process.env.NODE_ENV === 'production' ? undefined : page.match,
@@ -150,6 +129,44 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   const pageCreators = pages.map(page => createPageRecursively(page));
   await Promise.all(pageCreators);
 };
+
+function createPagesFromEdges(
+  createPage: (pageInfo: any) => void,
+  edges: [any?],
+  rootQuery: any,
+  options: PluginOptions,
+  page: any
+) {
+  // Cycle through each page returned from query...
+  edges.forEach(({ cursor, node }: any, index: number) => {
+    const params = {
+      ...node._meta,
+      lang: node._meta.lang === options.defaultLang ? null : node._meta.lang,
+    };
+
+    const toPath = pathToRegexp.compile(page.match || page.path);
+    const path = toPath(params);
+
+    // TODO: Include language in query...otherwise the pagination will get messed up
+    if (page.lang && page.lang !== node._meta.lang) {
+      return; // don't generate page in other than set language
+    }
+
+    // ...and create the page
+    createPage({
+      path: path === '' ? '/' : path,
+      component: page.component,
+      context: {
+        rootQuery,
+        ...node._meta,
+        cursor,
+        // would it be better to also include cursor or uid for prev and next pages?
+        // lastPageEndCursor: index === 0 ? lastEndCursor : endCursor, // for paging back
+        lastPageEndCursor: edges[index - 1] ? edges[index - 1].endCursor : '',
+      },
+    });
+  });
+}
 
 exports.createResolvers = (
   { actions, cache, createNodeId, createResolvers, store, reporter }: any,
