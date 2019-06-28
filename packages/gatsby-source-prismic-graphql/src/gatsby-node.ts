@@ -49,6 +49,7 @@ const getPagesQuery = ({ pageType }: { pageType: string }) => `
           endCursor
         }
         edges {
+          cursor
           node {
             _meta {
               id
@@ -82,7 +83,11 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
 
   // Helper that recursively creates 20 pages at a time for the given page type
   // (Prismic GraphQL queries only return up to 20 results per query)
-  async function createPageRecursively(page: any, endCursor: string = '') {
+  async function createPageRecursively(
+    page: any,
+    endCursor: string = '',
+    lastEndCursor: string = ''
+  ) {
     const pageType = `all${page.type}s`;
     const query = getPagesQuery({ pageType });
     const { data, errors } = await graphql(query, { after: endCursor });
@@ -93,11 +98,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       throw errors[0];
     }
 
-    const hasNextPage = data.prismic[pageType].pageInfo.hasNextPage;
-    endCursor = data.prismic[pageType].pageInfo.endCursor;
-
     // Cycle through each page returned from query...
-    data.prismic[pageType].edges.forEach(({ node }: any) => {
+    data.prismic[pageType].edges.forEach(({ cursor, node }: any, index: number) => {
       const params = {
         ...node._meta,
         lang: node._meta.lang === options.defaultLang ? null : node._meta.lang,
@@ -115,12 +117,18 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
         context: {
           rootQuery,
           ...node._meta,
+          cursor,
+          // would it be better to also include cursor or uid for prev and next pages?
+          lastPageEndCursor: index === 0 ? lastEndCursor : endCursor, // for paging back
         },
       });
     });
 
+    const hasNextPage = data.prismic[pageType].pageInfo.hasNextPage;
+    const newEndCursor = data.prismic[pageType].pageInfo.endCursor;
+
     if (hasNextPage) {
-      await createPageRecursively(page, endCursor);
+      await createPageRecursively(page, newEndCursor, endCursor);
     } else {
       // If there are no more pages, create the preview page for this page type
       createPage({
