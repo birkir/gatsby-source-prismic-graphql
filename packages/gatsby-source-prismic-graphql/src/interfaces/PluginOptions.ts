@@ -4,6 +4,7 @@ interface Page {
   path: string;
   component: string;
   lang?: string;
+  sortBy?: string;
 }
 
 export interface PluginOptions {

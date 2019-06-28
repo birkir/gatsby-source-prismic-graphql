@@ -34,7 +34,7 @@ exports.sourceNodes = (ref: any, options: PluginOptions) => {
   return sourceNodes(ref, opts);
 };
 
-const getPagesQuery = ({ pageType }: { pageType: string }) => `
+const getPagesQuery = ({ pageType, page }: { pageType: string; page: any }) => `
   query AllPagesQuery (
     $after: String
   ) {
@@ -42,6 +42,7 @@ const getPagesQuery = ({ pageType }: { pageType: string }) => `
       ${pageType} (
         first: 20
         after: $after
+        sortBy: ${page.sortBy || 'meta_lastPublicationDate_ASC'}
       ) {
         totalCount
         pageInfo {
@@ -88,7 +89,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   // (Prismic GraphQL queries only return up to 20 results per query)
   async function createPageRecursively(page: any, endCursor: string = '') {
     const pageType = `all${page.type}s`;
-    const query = getPagesQuery({ pageType });
+    const query = getPagesQuery({ pageType, page });
     const { data, errors } = await graphql(query, { after: endCursor });
     const rootQuery = getRootQuery(page.component);
 
