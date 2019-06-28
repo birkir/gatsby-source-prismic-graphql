@@ -55,6 +55,7 @@ const getPagesQuery = ({ pageType }: { pageType: string }) => `
               id
               lang
               uid
+              type
               alternateLanguages {
                 id
                 lang
@@ -161,6 +162,8 @@ function createPagesFromEdges(
         ...node._meta,
         cursor,
         // would it be better to also include cursor or uid for prev and next pages?
+        prevPageMeta: edges[index - 1] ? edges[index - 1].node._meta : null,
+        nextPageMeta: edges[index + 1] ? edges[index + 1].node._meta : null,
         // lastPageEndCursor: index === 0 ? lastEndCursor : endCursor, // for paging back
         lastPageEndCursor: edges[index - 1] ? edges[index - 1].endCursor : '',
       },
