@@ -89,7 +89,7 @@ function createDocumentPages(
 }
 
 const getDocumentsQuery = ({ documentType }: { documentType: string }) => `
-  query AllPagesQuery ($after: String, $lang: String!, $sortBy: PRISMIC_SortPosty) {
+  query AllPagesQuery ($after: String, $lang: String, $sortBy: PRISMIC_SortPosty) {
     prismic {
       ${documentType} (
         first: 20
@@ -126,20 +126,26 @@ const getDocumentsQuery = ({ documentType }: { documentType: string }) => `
 
 exports.createPages = async ({ graphql, actions: { createPage } }: any, options: PluginOptions) => {
   createGeneralPreviewPage(createPage, options);
-  let documents: [any?] = [];
 
   /**
    * Helper that recursively queries GraphQL to collect all documents for the given
    * page type. Once all documents are collected, it creates pages for them all.
    * Prismic GraphQL queries only return up to 20 results per query)
    */
-  async function createPagesForType(page: any, endCursor: string = '') {
+  async function createPagesForType(
+    page: any,
+    lang?: string,
+    endCursor: string = '',
+    documents: [any?] = []
+  ) {
     const documentType = `all${page.type}s`;
     const query = getDocumentsQuery({ documentType });
 
-    // TODO: Fix language support
-    const lang = page.lang || options.defaultLang;
-    const { data, errors } = await graphql(query, { after: endCursor, lang, sortBy: page.sortBy });
+    const { data, errors } = await graphql(query, {
+      after: endCursor,
+      lang: lang || null,
+      sortBy: page.sortBy,
+    });
 
     if (errors && errors.length) {
       throw errors[0];
@@ -155,17 +161,28 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
 
     if (response.pageInfo.hasNextPage) {
       const newEndCursor = response.pageInfo.endCursor;
-      await createPagesForType(page, newEndCursor);
+      await createPagesForType(page, lang, newEndCursor, documents);
     } else {
       createDocumentPreviewPage(createPage, options, page);
       createDocumentPages(createPage, documents, options, page);
-      documents = []; // empty out the array for the next document type
     }
   }
 
   // Create all the pages!
   const pages = options.pages || [];
-  const pageCreators = pages.map(page => createPagesForType(page));
+
+  // TODO: Decide whether options.defaultLang should be required. If not, what does it default to?
+  // allQueries accept `null` as the lang. Post does not.
+  const pageCreators: Promise<any>[] = [];
+  pages.forEach(page => {
+    const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
+    if (langs) {
+      langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
+    } else {
+      pageCreators.push(createPagesForType(page));
+    }
+  });
+
   await Promise.all(pageCreators);
 };
 

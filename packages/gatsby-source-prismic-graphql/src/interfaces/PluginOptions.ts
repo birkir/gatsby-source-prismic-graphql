@@ -3,7 +3,7 @@ interface Page {
   match: string;
   path: string;
   component: string;
-  lang?: string;
+  langs?: string[];
   sortBy?: string;
 }
 
@@ -13,6 +13,7 @@ export interface PluginOptions {
   prismicRef?: null | string;
   linkResolver?: Function;
   defaultLang?: string;
+  langs?: string[];
   passContextKeys?: string[];
   previewPath?: string;
   previews?: boolean;
