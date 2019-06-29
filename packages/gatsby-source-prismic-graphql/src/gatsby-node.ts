@@ -34,7 +34,7 @@ exports.sourceNodes = (ref: any, options: PluginOptions) => {
   return sourceNodes(ref, opts);
 };
 
-function createGeneralPreview(createPage: Function, options: PluginOptions) {
+function createGeneralPreviewPage(createPage: Function, options: PluginOptions) {
   const previewPath = options.previewPath || '/preview';
   createPage({
     path: previewPath.replace(/^\//, ''),
@@ -45,18 +45,13 @@ function createGeneralPreview(createPage: Function, options: PluginOptions) {
   });
 }
 
-function createDocumentPreview(
-  createPage: Function,
-  rootQuery: any,
-  options: PluginOptions,
-  page: any
-) {
+function createDocumentPreviewPage(createPage: Function, options: PluginOptions, page: any) {
   createPage({
     path: page.path,
     matchPath: process.env.NODE_ENV === 'production' ? undefined : page.match,
     component: page.component,
     context: {
-      rootQuery,
+      rootQuery: getRootQuery(page.component),
       id: '',
       uid: '',
       lang: options.defaultLang,
@@ -64,14 +59,13 @@ function createDocumentPreview(
   });
 }
 
-function createPagesFromEdges(
+function createDocumentPages(
   createPage: Function,
   edges: [any?],
-  rootQuery: any,
   options: PluginOptions,
   page: any
 ) {
-  // Cycle through each page returned from query...
+  // Cycle through each document returned from query...
   edges.forEach(({ cursor, node }: any, index: number) => {
     const lang = node._meta.lang === options.defaultLang ? null : node._meta.lang;
     const params = { ...node._meta, lang };
@@ -83,7 +77,7 @@ function createPagesFromEdges(
       path: path === '' ? '/' : path,
       component: page.component,
       context: {
-        rootQuery,
+        rootQuery: getRootQuery(page.component),
         ...node._meta,
         cursor,
         prevPageMeta: edges[index - 1] ? edges[index - 1].node._meta : null,
@@ -94,10 +88,10 @@ function createPagesFromEdges(
   });
 }
 
-const getPagesQuery = ({ pageType }: { pageType: string }) => `
+const getDocumentsQuery = ({ documentType }: { documentType: string }) => `
   query AllPagesQuery ($after: String, $lang: String!, $sortBy: PRISMIC_SortPosty) {
     prismic {
-      ${pageType} (
+      ${documentType} (
         first: 20
         after: $after
         sortBy: $sortBy
@@ -131,49 +125,47 @@ const getPagesQuery = ({ pageType }: { pageType: string }) => `
 `;
 
 exports.createPages = async ({ graphql, actions: { createPage } }: any, options: PluginOptions) => {
-  // Create top-level preview page
-  createGeneralPreview(createPage, options);
+  createGeneralPreviewPage(createPage, options);
+  let documents: [any?] = [];
 
-  let edgesCollection: [any?] = [];
-
-  // Helper that recursively creates 20 pages at a time for the given page type
-  // (Prismic GraphQL queries only return up to 20 results per query)
-  async function createPageRecursively(page: any, endCursor: string = '') {
-    const pageType = `all${page.type}s`;
-    const query = getPagesQuery({ pageType });
+  /**
+   * Helper that recursively queries GraphQL to collect all documents for the given
+   * page type. Once all documents are collected, it creates pages for them all.
+   * Prismic GraphQL queries only return up to 20 results per query)
+   */
+  async function createPagesForType(page: any, endCursor: string = '') {
+    const documentType = `all${page.type}s`;
+    const query = getDocumentsQuery({ documentType });
 
     // TODO: Fix language support
     const lang = page.lang || options.defaultLang;
     const { data, errors } = await graphql(query, { after: endCursor, lang, sortBy: page.sortBy });
 
-    const rootQuery = getRootQuery(page.component);
-
     if (errors && errors.length) {
       throw errors[0];
     }
 
-    data.prismic[pageType].edges.forEach((edge: any) => (edge.endCursor = endCursor));
+    const response = data.prismic[documentType];
 
-    // Add pages to list
-    edgesCollection = [...edgesCollection, ...data.prismic[pageType].edges] as [any?];
+    // Add last end cursor to all edges to enable pagination context when creating pages
+    response.edges.forEach((edge: any) => (edge.endCursor = endCursor));
 
-    const hasNextPage = data.prismic[pageType].pageInfo.hasNextPage;
-    const newEndCursor = data.prismic[pageType].pageInfo.endCursor;
+    // Stage documents for page creation
+    documents = [...documents, ...response.edges] as [any?];
 
-    if (hasNextPage) {
-      await createPageRecursively(page, newEndCursor);
+    if (response.pageInfo.hasNextPage) {
+      const newEndCursor = response.pageInfo.endCursor;
+      await createPagesForType(page, newEndCursor);
     } else {
-      // If there are no more pages, create the preview page for this page type
-      createDocumentPreview(createPage, rootQuery, options, page);
-      // and all of the pages themselves
-      createPagesFromEdges(createPage, edgesCollection, rootQuery, options, page);
-      edgesCollection = []; // empty out the array for the next page type
+      createDocumentPreviewPage(createPage, options, page);
+      createDocumentPages(createPage, documents, options, page);
+      documents = []; // empty out the array for the next document type
     }
   }
 
   // Create all the pages!
   const pages = options.pages || [];
-  const pageCreators = pages.map(page => createPageRecursively(page));
+  const pageCreators = pages.map(page => createPagesForType(page));
   await Promise.all(pageCreators);
 };
 
