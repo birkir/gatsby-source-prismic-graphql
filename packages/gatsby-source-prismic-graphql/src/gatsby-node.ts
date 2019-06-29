@@ -34,15 +34,74 @@ exports.sourceNodes = (ref: any, options: PluginOptions) => {
   return sourceNodes(ref, opts);
 };
 
-const getPagesQuery = ({ pageType, page }: { pageType: string; page: any }) => `
-  query AllPagesQuery (
-    $after: String
-  ) {
+function createGeneralPreview(createPage: Function, options: PluginOptions) {
+  const previewPath = options.previewPath || '/preview';
+  createPage({
+    path: previewPath.replace(/^\//, ''),
+    component: path.resolve(path.join(__dirname, 'components', 'PreviewPage.js')),
+    context: {
+      prismicPreviewPage: true,
+    },
+  });
+}
+
+function createDocumentPreview(
+  createPage: Function,
+  rootQuery: any,
+  options: PluginOptions,
+  page: any
+) {
+  createPage({
+    path: page.path,
+    matchPath: process.env.NODE_ENV === 'production' ? undefined : page.match,
+    component: page.component,
+    context: {
+      rootQuery,
+      id: '',
+      uid: '',
+      lang: options.defaultLang,
+    },
+  });
+}
+
+function createPagesFromEdges(
+  createPage: Function,
+  edges: [any?],
+  rootQuery: any,
+  options: PluginOptions,
+  page: any
+) {
+  // Cycle through each page returned from query...
+  edges.forEach(({ cursor, node }: any, index: number) => {
+    const lang = node._meta.lang === options.defaultLang ? null : node._meta.lang;
+    const params = { ...node._meta, lang };
+    const toPath = pathToRegexp.compile(page.match || page.path);
+    const path = toPath(params);
+
+    // ...and create the page
+    createPage({
+      path: path === '' ? '/' : path,
+      component: page.component,
+      context: {
+        rootQuery,
+        ...node._meta,
+        cursor,
+        prevPageMeta: edges[index - 1] ? edges[index - 1].node._meta : null,
+        nextPageMeta: edges[index + 1] ? edges[index + 1].node._meta : null,
+        lastPageEndCursor: edges[index - 1] ? edges[index - 1].endCursor : '',
+      },
+    });
+  });
+}
+
+const getPagesQuery = ({ pageType }: { pageType: string }) => `
+  query AllPagesQuery ($after: String, $lang: String!, $sortBy: PRISMIC_SortPosty) {
     prismic {
       ${pageType} (
         first: 20
         after: $after
-        sortBy: ${page.sortBy || 'meta_lastPublicationDate_ASC'}
+        sortBy: $sortBy
+        lang: $lang
       ) {
         totalCount
         pageInfo {
@@ -72,16 +131,8 @@ const getPagesQuery = ({ pageType, page }: { pageType: string; page: any }) => `
 `;
 
 exports.createPages = async ({ graphql, actions: { createPage } }: any, options: PluginOptions) => {
-  const previewPath = options.previewPath || '/preview';
-
   // Create top-level preview page
-  createPage({
-    path: previewPath.replace(/^\//, ''),
-    component: path.resolve(path.join(__dirname, 'components', 'PreviewPage.js')),
-    context: {
-      prismicPreviewPage: true,
-    },
-  });
+  createGeneralPreview(createPage, options);
 
   let edgesCollection: [any?] = [];
 
@@ -89,8 +140,12 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   // (Prismic GraphQL queries only return up to 20 results per query)
   async function createPageRecursively(page: any, endCursor: string = '') {
     const pageType = `all${page.type}s`;
-    const query = getPagesQuery({ pageType, page });
-    const { data, errors } = await graphql(query, { after: endCursor });
+    const query = getPagesQuery({ pageType });
+
+    // TODO: Fix language support
+    const lang = page.lang || options.defaultLang;
+    const { data, errors } = await graphql(query, { after: endCursor, lang, sortBy: page.sortBy });
+
     const rootQuery = getRootQuery(page.component);
 
     if (errors && errors.length) {
@@ -109,20 +164,10 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       await createPageRecursively(page, newEndCursor);
     } else {
       // If there are no more pages, create the preview page for this page type
-      // TODO: create pages from edges
+      createDocumentPreview(createPage, rootQuery, options, page);
+      // and all of the pages themselves
       createPagesFromEdges(createPage, edgesCollection, rootQuery, options, page);
       edgesCollection = []; // empty out the array for the next page type
-      createPage({
-        path: page.path,
-        matchPath: process.env.NODE_ENV === 'production' ? undefined : page.match,
-        component: page.component,
-        context: {
-          rootQuery,
-          id: '',
-          uid: '',
-          lang: options.defaultLang,
-        },
-      });
     }
   }
 
@@ -131,46 +176,6 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   const pageCreators = pages.map(page => createPageRecursively(page));
   await Promise.all(pageCreators);
 };
-
-function createPagesFromEdges(
-  createPage: (pageInfo: any) => void,
-  edges: [any?],
-  rootQuery: any,
-  options: PluginOptions,
-  page: any
-) {
-  // Cycle through each page returned from query...
-  edges.forEach(({ cursor, node }: any, index: number) => {
-    const params = {
-      ...node._meta,
-      lang: node._meta.lang === options.defaultLang ? null : node._meta.lang,
-    };
-
-    const toPath = pathToRegexp.compile(page.match || page.path);
-    const path = toPath(params);
-
-    // TODO: Include language in query...otherwise the pagination will get messed up
-    if (page.lang && page.lang !== node._meta.lang) {
-      return; // don't generate page in other than set language
-    }
-
-    // ...and create the page
-    createPage({
-      path: path === '' ? '/' : path,
-      component: page.component,
-      context: {
-        rootQuery,
-        ...node._meta,
-        cursor,
-        // would it be better to also include cursor or uid for prev and next pages?
-        prevPageMeta: edges[index - 1] ? edges[index - 1].node._meta : null,
-        nextPageMeta: edges[index + 1] ? edges[index + 1].node._meta : null,
-        // lastPageEndCursor: index === 0 ? lastEndCursor : endCursor, // for paging back
-        lastPageEndCursor: edges[index - 1] ? edges[index - 1].endCursor : '',
-      },
-    });
-  });
-}
 
 exports.createResolvers = (
   { actions, cache, createNodeId, createResolvers, store, reporter }: any,
