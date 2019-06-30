@@ -2,7 +2,7 @@ import path from 'path';
 import { getRootQuery } from 'gatsby-source-graphql-universal/getRootQuery';
 import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
 import { fieldName, PrismicLink, typeName } from './utils';
-import { PluginOptions } from './interfaces/PluginOptions';
+import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
 import pathToRegexp from 'path-to-regexp';
 
@@ -34,7 +34,7 @@ exports.sourceNodes = (ref: any, options: PluginOptions) => {
   return sourceNodes(ref, opts);
 };
 
-function createGeneralPreviewPage(createPage: Function, options: PluginOptions) {
+function createGeneralPreviewPage(createPage: Function, options: PluginOptions): void {
   const previewPath = options.previewPath || '/preview';
   createPage({
     path: previewPath.replace(/^\//, ''),
@@ -45,7 +45,7 @@ function createGeneralPreviewPage(createPage: Function, options: PluginOptions) 
   });
 }
 
-function createDocumentPreviewPage(createPage: Function, options: PluginOptions, page: any) {
+function createDocumentPreviewPage(createPage: Function, options: PluginOptions, page: Page): void {
   createPage({
     path: page.path,
     matchPath: process.env.NODE_ENV === 'production' ? undefined : page.match,
@@ -59,22 +59,45 @@ function createDocumentPreviewPage(createPage: Function, options: PluginOptions,
   });
 }
 
+/**
+ * Create URL paths interpolating `:uid` and `:lang` or `:lang?` with actual values.
+ * @param pageOptions - Returned paths are based on the `match` or `path` (if `match`
+ * is not present) properties of the `pageOptions` object.
+ * @param node - Document node metadata provide the `lang` and `uid` values for the returned path.
+ * @param defaultLang - `defaultLang` as declared in `PluginOptions`. If `lang` segment is
+ * marked optional (`:lang?`) in the page `match` or `path` values and `defaultLang` matches the
+ * document's actual language, the language segment of the path will be omitted in the returned path.
+ * @return The path for the document's URL with `lang` and `uid` interpolated as necessary.
+ */
+function createDocumentPath(pageOptions: Page, node: any, defaultLang?: string): string {
+  const pathKeys: any[] = [];
+  const pathTemplate = pageOptions.match || pageOptions.path;
+  pathToRegexp(pathTemplate, pathKeys);
+  const langKey = pathKeys.find(key => key.name === 'lang');
+  const isLangOptional = !!(langKey && langKey.optional);
+  const toPath = pathToRegexp.compile(pathTemplate);
+
+  const documentLang = node._meta.lang;
+  const isDocumentLangDefault = documentLang === defaultLang;
+  const shouldExcludeLangInPath = isLangOptional && isDocumentLangDefault;
+  const lang = shouldExcludeLangInPath ? null : documentLang;
+
+  const params = { ...node._meta, lang };
+  const path = toPath(params);
+  return path === '' ? '/' : path;
+}
+
 function createDocumentPages(
   createPage: Function,
   edges: [any?],
   options: PluginOptions,
-  page: any
-) {
+  page: Page
+): void {
   // Cycle through each document returned from query...
   edges.forEach(({ cursor, node }: any, index: number) => {
-    const lang = node._meta.lang === options.defaultLang ? null : node._meta.lang;
-    const params = { ...node._meta, lang };
-    const toPath = pathToRegexp.compile(page.match || page.path);
-    const path = toPath(params);
-
     // ...and create the page
     createPage({
-      path: path === '' ? '/' : path,
+      path: createDocumentPath(page, node, options.defaultLang),
       component: page.component,
       context: {
         rootQuery: getRootQuery(page.component),
@@ -88,7 +111,7 @@ function createDocumentPages(
   });
 }
 
-const getDocumentsQuery = ({ documentType }: { documentType: string }) => `
+const getDocumentsQuery = ({ documentType }: { documentType: string }): string => `
   query AllPagesQuery ($after: String, $lang: String, $sortBy: PRISMIC_SortPosty) {
     prismic {
       ${documentType} (
@@ -133,11 +156,11 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
    * Prismic GraphQL queries only return up to 20 results per query)
    */
   async function createPagesForType(
-    page: any,
+    page: Page,
     lang?: string,
     endCursor: string = '',
     documents: [any?] = []
-  ) {
+  ): Promise<any> {
     const documentType = `all${page.type}s`;
     const query = getDocumentsQuery({ documentType });
 
@@ -174,14 +197,16 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   // TODO: Decide whether options.defaultLang should be required. If not, what does it default to?
   // allQueries accept `null` as the lang. Post does not.
   const pageCreators: Promise<any>[] = [];
-  pages.forEach(page => {
-    const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
-    if (langs) {
-      langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
-    } else {
-      pageCreators.push(createPagesForType(page));
+  pages.forEach(
+    (page: Page): void => {
+      const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
+      if (langs) {
+        langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
+      } else {
+        pageCreators.push(createPagesForType(page));
+      }
     }
-  });
+  );
 
   await Promise.all(pageCreators);
 };

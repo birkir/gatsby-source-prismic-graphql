@@ -1,4 +1,4 @@
-interface Page {
+export interface Page {
   type: string;
   match: string;
   path: string;
