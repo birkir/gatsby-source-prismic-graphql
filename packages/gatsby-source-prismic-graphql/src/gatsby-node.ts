@@ -107,8 +107,14 @@ function createDocumentPages(
   });
 }
 
-const getDocumentsQuery = ({ documentType }: { documentType: string }): string => `
-  query AllPagesQuery ($after: String, $lang: String, $sortBy: PRISMIC_SortPosty) {
+const getDocumentsQuery = ({
+  documentType,
+  sortType,
+}: {
+  documentType: string;
+  sortType: string;
+}): string => `
+  query AllPagesQuery ($after: String, $lang: String, $sortBy: ${sortType}) {
     prismic {
       ${documentType} (
         first: 20
@@ -158,7 +164,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     documents: [any?] = []
   ): Promise<any> {
     const documentType = `all${page.type}s`;
-    const query = getDocumentsQuery({ documentType });
+    const sortType = `PRISMIC_Sort${page.type}y`;
+    const query = getDocumentsQuery({ documentType, sortType });
 
     const { data, errors } = await graphql(query, {
       after: endCursor,
@@ -189,9 +196,6 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
 
   // Create all the pages!
   const pages = options.pages || [];
-
-  // TODO: Decide whether options.defaultLang should be required. If not, what does it default to?
-  // allQueries accept `null` as the lang. Post does not.
   const pageCreators: Promise<any>[] = [];
   pages.forEach(
     (page: Page): void => {
