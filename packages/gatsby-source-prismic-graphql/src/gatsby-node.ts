@@ -35,7 +35,7 @@ exports.sourceNodes = (ref: any, options: PluginOptions) => {
 };
 
 function createGeneralPreviewPage(createPage: Function, options: PluginOptions): void {
-  const previewPath = options.previewPath || '/preview';
+  const previewPath: string = options.previewPath || '/preview';
   createPage({
     path: previewPath.replace(/^\//, ''),
     component: path.resolve(path.join(__dirname, 'components', 'PreviewPage.js')),
@@ -67,19 +67,19 @@ function createDocumentPreviewPage(createPage: Function, page: Page, lang?: stri
  */
 function createDocumentPath(pageOptions: Page, node: any, defaultLang?: string): string {
   const pathKeys: any[] = [];
-  const pathTemplate = pageOptions.match || pageOptions.path;
+  const pathTemplate: string = pageOptions.match || pageOptions.path;
   pathToRegexp(pathTemplate, pathKeys);
   const langKey = pathKeys.find(key => key.name === 'lang');
-  const isLangOptional = !!(langKey && langKey.optional);
-  const toPath = pathToRegexp.compile(pathTemplate);
+  const isLangOptional: boolean = !!(langKey && langKey.optional);
+  const toPath: Function = pathToRegexp.compile(pathTemplate);
 
-  const documentLang = node._meta.lang;
-  const isDocumentLangDefault = documentLang === defaultLang;
-  const shouldExcludeLangInPath = isLangOptional && isDocumentLangDefault;
-  const lang = shouldExcludeLangInPath ? null : documentLang;
+  const documentLang: string = node._meta.lang;
+  const isDocumentLangDefault: boolean = documentLang === defaultLang;
+  const shouldExcludeLangInPath: boolean = isLangOptional && isDocumentLangDefault;
+  const lang: string | null = shouldExcludeLangInPath ? null : documentLang;
 
   const params = { ...node._meta, lang };
-  const path = toPath(params);
+  const path: string = toPath(params);
   return path === '' ? '/' : path;
 }
 
@@ -163,10 +163,10 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     endCursor: string = '',
     documents: [any?] = []
   ): Promise<any> {
-    const documentType = `all${page.type}s`;
-    const sortType = `PRISMIC_Sort${page.type}y`;
-    const query = getDocumentsQuery({ documentType, sortType });
-
+    // Prepare and execute query
+    const documentType: string = `all${page.type}s`;
+    const sortType: string = `PRISMIC_Sort${page.type}y`;
+    const query: string = getDocumentsQuery({ documentType, sortType });
     const { data, errors } = await graphql(query, {
       after: endCursor,
       lang: lang || null,
@@ -186,7 +186,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     documents = [...documents, ...response.edges] as [any?];
 
     if (response.pageInfo.hasNextPage) {
-      const newEndCursor = response.pageInfo.endCursor;
+      const newEndCursor: string = response.pageInfo.endCursor;
       await createPagesForType(page, lang, newEndCursor, documents);
     } else {
       createDocumentPreviewPage(createPage, page, lang);
@@ -194,9 +194,11 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     }
   }
 
-  // Create all the pages!
-  const pages = options.pages || [];
+  // Prepare to create all the pages
+  const pages: Page[] = options.pages || [];
   const pageCreators: Promise<any>[] = [];
+
+  // Create pageCreator promises for each page/language combination
   pages.forEach(
     (page: Page): void => {
       const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
@@ -208,6 +210,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     }
   );
 
+  // Run all pageCreators simultaneously
   await Promise.all(pageCreators);
 };
 
