@@ -45,17 +45,13 @@ function createGeneralPreviewPage(createPage: Function, options: PluginOptions):
   });
 }
 
-function createDocumentPreviewPage(createPage: Function, options: PluginOptions, page: Page): void {
+function createDocumentPreviewPage(createPage: Function, page: Page, lang?: string): void {
+  const rootQuery = getRootQuery(page.component);
   createPage({
     path: page.path,
     matchPath: process.env.NODE_ENV === 'production' ? undefined : page.match,
     component: page.component,
-    context: {
-      rootQuery: getRootQuery(page.component),
-      id: '',
-      uid: '',
-      lang: options.defaultLang,
-    },
+    context: { rootQuery, id: '', uid: '', lang },
   });
 }
 
@@ -186,7 +182,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       const newEndCursor = response.pageInfo.endCursor;
       await createPagesForType(page, lang, newEndCursor, documents);
     } else {
-      createDocumentPreviewPage(createPage, options, page);
+      createDocumentPreviewPage(createPage, page, lang);
       createDocumentPages(createPage, documents, options, page);
     }
   }
