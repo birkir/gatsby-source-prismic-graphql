@@ -55,7 +55,7 @@ const Pagination = ({ nextArticle, prevArticle }) => (
   <div style={{ borderStyle: 'solid', padding: '1em', marginBottom: '1em' }}>
     <h3>Simple Static Pagination</h3>
     <p>
-      This example demonstrates staticly-generated pagination without additional page queries.
+      This example demonstrates statically-generated pagination without additional page queries.
       Pagination information is retrieved directly from
       <code>pageContext</code>.
     </p>
@@ -81,7 +81,7 @@ const EnhancedPagination = ({ nextArticle, prevArticle }) => (
   <div style={{ borderStyle: 'solid', padding: '1em', marginBottom: '1em' }}>
     <h3>Enhanced Static Pagination</h3>
     <p>
-      This example demonstrates staticly-generated pagination enhanced with more detailed
+      This example demonstrates statically-generated pagination enhanced with more detailed
       information about the previous and next documents&mdash;in this case, the article title.
       Modifying the page query is required.
     </p>
