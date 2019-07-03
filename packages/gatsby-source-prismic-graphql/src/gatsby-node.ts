@@ -51,7 +51,16 @@ function createDocumentPreviewPage(createPage: Function, page: Page, lang?: stri
     path: page.path,
     matchPath: process.env.NODE_ENV === 'production' ? undefined : page.match,
     component: page.component,
-    context: { rootQuery, id: '', uid: '', lang },
+    context: {
+      rootQuery,
+      id: '',
+      uid: '',
+      lang,
+      paginationPreviousUid: '',
+      paginationPreviousLang: '',
+      paginationNextUid: '',
+      paginationNextLang: '',
+    },
   });
 }
 
@@ -91,6 +100,9 @@ function createDocumentPages(
 ): void {
   // Cycle through each document returned from query...
   edges.forEach(({ cursor, node }: any, index: number) => {
+    const previousNode = edges[index - 1] && edges[index - 1].node;
+    const nextNode = edges[index + 1] && edges[index + 1].node;
+
     // ...and create the page
     createPage({
       path: createDocumentPath(page, node, options.defaultLang),
@@ -99,9 +111,14 @@ function createDocumentPages(
         rootQuery: getRootQuery(page.component),
         ...node._meta,
         cursor,
-        prevPageMeta: edges[index - 1] ? edges[index - 1].node._meta : null,
-        nextPageMeta: edges[index + 1] ? edges[index + 1].node._meta : null,
-        lastPageEndCursor: edges[index - 1] ? edges[index - 1].endCursor : '',
+        paginationPreviousMeta: previousNode ? previousNode._meta : null,
+        paginationPreviousUid: previousNode ? previousNode._meta.uid : '',
+        paginationPreviousLang: previousNode ? previousNode._meta.lang : '',
+        paginationNextMeta: nextNode ? nextNode._meta : null,
+        paginationNextUid: nextNode ? nextNode._meta.uid : '',
+        paginationNextLang: nextNode ? nextNode._meta.lang : '',
+        // pagination helpers for overcoming backwards pagination issues cause by Prismic's 20-document query limit
+        lastQueryChunkEndCursor: edges[index - 1] ? edges[index - 1].endCursor : '',
       },
     });
   });
