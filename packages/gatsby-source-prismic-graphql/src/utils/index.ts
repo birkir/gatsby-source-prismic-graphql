@@ -27,6 +27,14 @@ export function getCookies() {
   return parseQueryString(document.cookie, ';');
 }
 
+export function getDocumentIndexFromCursor(cursor: string) {
+  return atob(cursor).split(':')[1];
+}
+
+export function getCursorFromDocumentIndex(index: number) {
+  return btoa(`arrayconnection:${index}`);
+}
+
 export function fetchStripQueryWhitespace(url: string, ...args: any) {
   const [hostname, qs = ''] = url.split('?');
   const queryString = parseQueryString(qs);

@@ -1,6 +1,7 @@
 import { graphql, Link } from 'gatsby';
 import { get } from 'lodash';
 import React, { useEffect, useRef } from 'react';
+import { getCursorFromDocumentIndex } from 'gatsby-source-prismic-graphql';
 import Layout from '../components/layout';
 
 export const query = graphql`
@@ -46,7 +47,7 @@ const Home = props => {
     }
 
     props.prismic
-      .load({ variables: { after: btoa(`arrayconnection:${page}`) } })
+      .load({ variables: { after: getCursorFromDocumentIndex(page) } })
       .then(res => setData(res.data));
   }, [page]);
 
