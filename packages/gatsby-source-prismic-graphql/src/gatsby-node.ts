@@ -3,6 +3,7 @@ import { getRootQuery } from 'gatsby-source-graphql-universal/getRootQuery';
 import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
 import { fieldName, PrismicLink, typeName } from './utils';
 import { PluginOptions } from './interfaces/PluginOptions';
+import { createRemoteFileNode } from 'gatsby-source-filesystem';
 import pathToRegexp from 'path-to-regexp';
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
@@ -16,21 +17,21 @@ exports.onCreatePage = ({ page, actions }: any) => {
   }
 };
 
-exports.sourceNodes = (
-  ref: any,
-  options: { [key: string]: any; accessToken?: string; prismicRef?: string; repositoryName: string }
-) => {
-  options.fieldName = fieldName;
-  options.typeName = typeName;
-  options.createLink = () =>
-    PrismicLink({
-      uri: `https://${options.repositoryName}.prismic.io/graphql`,
-      credentials: 'same-origin',
-      accessToken: options.accessToken,
-      customRef: options.prismicRef,
-    });
+exports.sourceNodes = (ref: any, options: PluginOptions) => {
+  const opts = {
+    fieldName,
+    typeName,
+    createLink: () =>
+      PrismicLink({
+        uri: `https://${options.repositoryName}.prismic.io/graphql`,
+        credentials: 'same-origin',
+        accessToken: options.accessToken as any,
+        customRef: options.prismicRef as any,
+      }),
+    ...options,
+  };
 
-  return sourceNodes(ref, options);
+  return sourceNodes(ref, opts);
 };
 
 exports.createPages = async ({ graphql, actions: { createPage } }: any, options: PluginOptions) => {
@@ -48,28 +49,28 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     (options.pages || []).map(async page => {
       const queryKey = `all${page.type}s`;
       const query = `
-      query {
-        prismic {
-          ${queryKey} {
-            edges {
-              node {
-                _meta {
-                  id
-                  lang
-                  uid
-                  alternateLanguages {
+        query {
+          prismic {
+            ${queryKey} {
+              edges {
+                node {
+                  _meta {
                     id
                     lang
-                    type
                     uid
+                    alternateLanguages {
+                      id
+                      lang
+                      type
+                      uid
+                    }
                   }
                 }
               }
             }
           }
         }
-      }
-    `;
+      `;
 
       const { data, errors } = await graphql(query);
       const toPath = pathToRegexp.compile(page.match || page.path);
@@ -115,4 +116,60 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       });
     })
   );
+};
+
+exports.createResolvers = (
+  { actions, cache, createNodeId, createResolvers, store, reporter }: any,
+  { sharpKeys = [/image|photo|picture/] }: PluginOptions
+) => {
+  const { createNode } = actions;
+
+  const state = store.getState();
+  const [prismicSchema = {}] = state.schemaCustomization.thirdPartySchemas;
+  const typeMap = prismicSchema._typeMap;
+  const resolvers: { [key: string]: any } = {};
+
+  for (const typeName in typeMap) {
+    const typeEntry = typeMap[typeName];
+    const typeFields = (typeEntry && typeEntry.getFields && typeEntry.getFields()) || {};
+    const typeResolver: { [key: string]: any } = {};
+    for (const fieldName in typeFields) {
+      const field = typeFields[fieldName];
+      if (
+        field.type === typeMap.PRISMIC_Json &&
+        sharpKeys.some((re: RegExp | string) =>
+          re instanceof RegExp ? re.test(fieldName) : re === fieldName
+        )
+      ) {
+        typeResolver[`${fieldName}Sharp`] = {
+          type: 'File',
+          args: {
+            crop: { type: typeMap.String },
+          },
+          resolve(source: any, args: any) {
+            const obj = (source && source[fieldName]) || {};
+            const url = args.crop ? obj[args.crop] && obj[args.crop].url : obj.url;
+            if (url) {
+              return createRemoteFileNode({
+                url,
+                store,
+                cache,
+                createNode,
+                createNodeId,
+                reporter,
+              });
+            }
+            return null;
+          },
+        };
+      }
+    }
+    if (Object.keys(typeResolver).length) {
+      resolvers[typeName] = typeResolver;
+    }
+  }
+
+  if (Object.keys(resolvers).length) {
+    createResolvers(resolvers);
+  }
 };

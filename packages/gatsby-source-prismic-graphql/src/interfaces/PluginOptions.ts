@@ -17,4 +17,5 @@ export interface PluginOptions {
   previews?: boolean;
   pages?: Page[];
   omitPrismicScript?: boolean;
+  sharpKeys: RegExp[] | string[];
 }
