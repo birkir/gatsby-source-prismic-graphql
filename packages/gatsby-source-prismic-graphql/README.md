@@ -279,7 +279,7 @@ import get from 'lodash/get';
 
 // ...
 
-const sharpImage = get(data, 'prismic.Author.profile_pictureShap.childImageSharp.fluid');
+const sharpImage = get(data, 'prismic.Author.profile_pictureSharp.childImageSharp.fluid');
 return sharpImage ? (
   <Img fluid={sharpImage} />
 ) : (
