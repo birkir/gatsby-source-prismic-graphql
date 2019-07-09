@@ -34,6 +34,10 @@ Add plugin to `gatsby-config.js`:
       path: '/article',        // Placeholder page for unpublished documents
       component: require.resolve('./src/templates/article.js'),
     }],
+    sharpKeys: [
+      /image|photo|picture/, // (default)
+      'profilepic',
+    ],
   }
 }
 ```
@@ -222,6 +226,68 @@ export default function Example({ data, prismic }) {
   );
 }
 ```
+
+### Working with gatsby-image
+
+Latest version of the plugin supports gatsby-image by adding a new property to graphql types that contain fields that match the `sharpKeys` array (this defaults to `/image|photo|picture/`) with the `Sharp` suffix.
+
+**Note:** When querying, make sure to also query the source field, eg.
+
+```gql
+query {
+  prismic {
+    Article(id: "123") {
+      title
+      articlePhoto
+      articlePhotoSharp {
+        childImageSharp {
+          fluid(maxWidth: 400, maxHeight: 250) {
+            ...GatsbyImageSharpFluid
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+You can also get access to specific crop sizes from Prismic by passing the `crop` argument:
+
+```gql
+query {
+  prismic {
+    Author(id: "123") {
+      name
+      profile_picture
+      profile_pictureSharp(crop: "face") {
+        childImageSharp {
+          fluid(maxWidth: 500, maxHeight: 500) {
+            ...GatsbyImageSharpFluid
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**NOTE** Does not transform images in preview mode, so make sure to fallback to the default image when the sharp image is null.
+
+```tsx
+import Img from 'gatsby-image';
+import get from 'lodash/get';
+
+// ...
+
+const sharpImage = get(data, 'prismic.Author.profile_pictureShap.childImageSharp.fluid');
+return sharpImage ? (
+  <Img fluid={sharpImage} />
+) : (
+  <img src={get(data, 'prismic.Author.profile_picture.url')} />
+);
+```
+
+Later we may add a Image component that does this for you, and leverages the new Prismic Image API as fallback for preview modes.
 
 ### Prismic.io content a/b experiments integration
 

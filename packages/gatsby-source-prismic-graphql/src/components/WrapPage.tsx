@@ -3,6 +3,7 @@ import { pick, get } from 'lodash';
 import pathToRegexp from 'path-to-regexp';
 import Prismic from 'prismic-javascript';
 import React from 'react';
+import traverse from 'traverse';
 import { fieldName, getCookies, typeName } from '../utils';
 import { createLoadingScreen } from '../utils/createLoadingScreen';
 import { getApolloClient } from '../utils/getApolloClient';
@@ -15,6 +16,20 @@ const queryOrSource = (obj: any) => {
     return String(obj.source).replace(/\s+/g, ' ');
   }
   return null;
+};
+
+const stripSharp = (query: any) => {
+  return traverse(query).map(function(x) {
+    if (
+      typeof x === 'object' &&
+      x.kind == 'Name' &&
+      this.parent &&
+      this.parent.node.kind === 'Field' &&
+      x.value.match(/Sharp$/)
+    ) {
+      this.parent.remove();
+    }
+  });
 };
 
 interface WrapPageState {
@@ -116,7 +131,7 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
 
     return getApolloClient(this.props.options).then(client => {
       return client.query({
-        query: getIsolatedQuery(query, fieldName, typeName) || query,
+        query: stripSharp(getIsolatedQuery(query, fieldName, typeName)),
         fetchPolicy: 'network-only',
         variables,
         ...rest,
