@@ -12,6 +12,7 @@ Please **be sure your Prismic repository has the GraphQL API enabled**. It is en
 - [Getting Started](#getting-started)
 - [Usage](#usage)
   - [Automatic Page Generation](#automatic-page-generation)
+  - [Support for Multiple Languages/Locales](#support-for-multiple-languages)
   - [Page Queries: Fetch Data From Prismic](#page-queries-fetch-data-from-prismic)
   - [Prismic Previews](#prismic-previews)
   - [StaticQuery & useStaticQuery](#staticquery-and-usestaticquery)
@@ -84,7 +85,7 @@ registerLinkResolver(linkResolver);
 
 ### Automatic Page Generation
 
-You can generate pages automatically by providing mapping configuration under the `pages` option in `gatsby-config.js`.
+You can generate pages automatically by providing a mapping configuration under the `pages` option in `gatsby-config.js`.
 
 Let's assume we have the following page configuration set:
 
@@ -109,6 +110,52 @@ If you create a new unpublished blogpost, `baz` it will be accessible for previe
 - `/blogpost?uid=baz`
 
 More on [Prismic Previews](#prismic-previews) below.
+
+### Support for Multiple Languages
+
+Prismic allows you to create your content in multiple languages. This library supports that too. When setting up your configuration options in `gatsby-config.js`, there are three _optional_ properties you should be aware of: `options.defaultLang`, `options.langs`, and `options.pages[i].langs`. In the following example, all are in use:
+
+```js
+{
+  resolve: 'gatsby-source-prismic-graphql',
+  options: {
+    repositoryName: 'gatsby-source-prismic-test-site',
+    defaultLang: 'en-us',
+    langs: ['en-us', 'es-es', 'is'],
+    path: '/preview',
+    previews: true,
+    pages: [{
+      type: 'Article',
+      match: '/:lang?/:uid',
+      path: '/article',
+      component: require.resolve('./src/templates/article.js'),
+      sortBy: 'date_ASC',
+      langs: ['en-us', 'es-es', 'is'],
+    }, {
+      type: "Noticias",
+      match: '/noticias/:uid',
+      path: '/noticias',
+      component: require.resolve('./src/templates/noticias.js'),
+      sortBy: 'date_ASC',
+      langs: ['es-es'],
+    }],
+  }
+}
+```
+
+In the example above, pages are generated for two document types from Prismic--Articles and Noticias. The latter consists of news stories in Spanish. There are three languages total in use in this blog: US English, Traditional Spanish and Icelandic.
+
+For Articles, we are instructing the plugin to generate pages for articles of all three languages. But, because there is a question mark (`?`) after the `:lang` portion of the `match` property (`/:lang?/:uid`), we only include the locale tag in the URL slug for languages that are not the `defaultLang` specified above (_i.e._, 'en-us'). So for the following languages, these are the slugs generated:
+
+- US English: `/epic-destinations`
+- Spanish: `/es-es/destinos-increibles`
+- Icelandic: `/is/reykjadalur`
+
+If we had not specified a `defaultLang`, the slug for US English would have been `/en-us/epic-destinations`. And, in fact, including the `langs: ['en-us', 'es-es', 'is']` declaration for this particular document type (`Articles`) is unnecessary because we already specified that as the default language set right after `defaultLang` in the plugin options.
+
+For Noticias, however, we only want to generate pages for Spanish documents of that type (`langs` is `[es-es]`). We decide that in this context, no locale tag is needed in the URL slug; "noticias" is already enough indication that the contents are in Spanish. So we omit the `:lang` match entirely and specify only `match: '/noticias/:uid'`.
+
+This is an example of how these three properties can be used together to offer maximum flexibility. To see this in action, check out the [languages example app](https://github.com/birkir/gatsby-source-prismic-graphql/tree/master/examples/languages).
 
 ### Page Queries: Fetch Data From Prismic
 
