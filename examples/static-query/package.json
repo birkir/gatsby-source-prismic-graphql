@@ -1,7 +1,7 @@
 {
   "name": "@examples/static-query",
   "private": true,
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "A simple starter to get up and developing quickly with Gatsby",
   "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "dependencies": {
@@ -15,7 +15,7 @@
     "gatsby-plugin-sharp": "^2.0.29",
     "gatsby-source-filesystem": "^2.0.27",
     "gatsby-source-graphql-universal": "^3.0.5",
-    "gatsby-source-prismic-graphql": "^3.3.0",
+    "gatsby-source-prismic-graphql": "^3.3.1",
     "gatsby-transformer-sharp": "^2.1.17",
     "prismic-reactjs": "^0.3.2",
     "prop-types": "^15.7.2",
