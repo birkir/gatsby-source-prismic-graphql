@@ -10,6 +10,7 @@ module.exports = {
       options: {
         repositoryName: 'ueno-starter-kit-universally-test',
         defaultLang: 'en-us',
+        langs: ['en-us', 'is'],
         pages: [
           {
             type: 'Homepage',

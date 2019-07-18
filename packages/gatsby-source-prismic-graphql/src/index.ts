@@ -4,6 +4,8 @@ export { withPreview } from './components/withPreview';
 export {
   PrismicLink,
   getCookies,
+  getCursorFromDocumentIndex,
+  getDocumentIndexFromCursor,
   registerLinkResolver,
   linkResolver,
   fieldName,
