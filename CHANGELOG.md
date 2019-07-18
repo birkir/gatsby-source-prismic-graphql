@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.4.0-beta.0](https://github.com/birkir/gatsby-source-prismic-graphql/compare/v3.3.1...v3.4.0-beta.0) (2019-07-18)
+
+### Bug Fixes
+
+- improve pagination context var names; pass context for previews ([166321c](https://github.com/birkir/gatsby-source-prismic-graphql/commit/166321c))
+- languages example ([84f9253](https://github.com/birkir/gatsby-source-prismic-graphql/commit/84f9253))
+- logic problems with dynamic pagination already in example ([eb0fa26](https://github.com/birkir/gatsby-source-prismic-graphql/commit/eb0fa26))
+- multi-locale path-generation logic, enhanced typing ([bbe2aa5](https://github.com/birkir/gatsby-source-prismic-graphql/commit/bbe2aa5))
+- multi-locale support compatible with pagination ([bffeea2](https://github.com/birkir/gatsby-source-prismic-graphql/commit/bffeea2))
+- sortBy works for all document types ([d861c9d](https://github.com/birkir/gatsby-source-prismic-graphql/commit/d861c9d))
+- support previews in other than defaultLang ([e621a76](https://github.com/birkir/gatsby-source-prismic-graphql/commit/e621a76))
+
+### Features
+
+- add direct support for referencing next and prev pages ([a3c06db](https://github.com/birkir/gatsby-source-prismic-graphql/commit/a3c06db))
+- add support for passing sortBy for pages ([aa893b4](https://github.com/birkir/gatsby-source-prismic-graphql/commit/aa893b4))
+- create and expose cursor encoding helpers ([a1959ac](https://github.com/birkir/gatsby-source-prismic-graphql/commit/a1959ac))
+- enable backwards pagination by providing lastPageEndCursor ([2f0fe1b](https://github.com/birkir/gatsby-source-prismic-graphql/commit/2f0fe1b))
+
 ## [3.3.1](https://github.com/birkir/gatsby-source-prismic-graphql/compare/v3.3.0...v3.3.1) (2019-07-18)
 
 ### Bug Fixes
