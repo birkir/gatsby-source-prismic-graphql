@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.4.0-beta.1](https://github.com/birkir/gatsby-source-prismic-graphql/compare/v3.4.0-beta.0...v3.4.0-beta.1) (2019-07-29)
+
+### Bug Fixes
+
+- bump prismic-javascript dep to fix timeout connection issues ([36f04f2](https://github.com/birkir/gatsby-source-prismic-graphql/commit/36f04f2))
+- check if proptypes can be added to StaticQuery ([f05a5e6](https://github.com/birkir/gatsby-source-prismic-graphql/commit/f05a5e6))
+
 # [3.4.0-beta.0](https://github.com/birkir/gatsby-source-prismic-graphql/compare/v3.3.1...v3.4.0-beta.0) (2019-07-18)
 
 ### Bug Fixes
