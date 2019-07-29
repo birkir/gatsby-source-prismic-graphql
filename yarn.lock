@@ -6729,10 +6729,10 @@ gatsby-source-graphql-universal@^3.0.5:
     lodash.get "^4.4.2"
     traverse "^0.6.6"
 
-gatsby-source-graphql-universal@^3.1.4:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/gatsby-source-graphql-universal/-/gatsby-source-graphql-universal-3.1.4.tgz#c2c399d7f677c81102bd988c63de5262e66701ac"
-  integrity sha512-A9O9N1JJ0ynQaf3uxVfRna0dIX0V2C988VPwdk4Vw66fisHDuV6llyahHiYJehoWNEJxWvrWeLOrg9ynk8WX4A==
+gatsby-source-graphql-universal@^3.1.5:
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/gatsby-source-graphql-universal/-/gatsby-source-graphql-universal-3.1.5.tgz#f1e632bf32d15b0e9facb2374fb33931144fd239"
+  integrity sha512-NH2+I3eY9UJILA9nQpG8igQOV5DZ98IQH6fuJFTn/p29Ag/NMsW/GfjcknZAY2xBaweJPhdISg8XAXiTabSFSQ==
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@types/graphql" "^14.0.4"
