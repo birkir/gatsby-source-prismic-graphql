@@ -4,13 +4,15 @@ import React from 'react';
 import { WrapPage } from './components/WrapPage';
 
 // Fixes proptypes warning for StaticQuery
-(StaticQuery as any).propTypes.query = PropTypes.oneOfType([
-  PropTypes.string,
-  PropTypes.shape({
-    id: PropTypes.string,
-    source: PropTypes.string,
-  }),
-]);
+if (StaticQuery && typeof StaticQuery === 'object' && (StaticQuery as any).propTypes) {
+  (StaticQuery as any).propTypes.query = PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.shape({
+      id: PropTypes.string,
+      source: PropTypes.string,
+    }),
+  ]);
+}
 
 interface WrapPageArgs {
   element: any;
