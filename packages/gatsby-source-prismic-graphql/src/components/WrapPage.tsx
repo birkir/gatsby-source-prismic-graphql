@@ -5,6 +5,7 @@ import Prismic from 'prismic-javascript';
 import React from 'react';
 import traverse from 'traverse';
 import { fieldName, getCookies, typeName } from '../utils';
+import { PreviewCookie } from '../utils/prismic';
 import { createLoadingScreen } from '../utils/createLoadingScreen';
 import { getApolloClient } from '../utils/getApolloClient';
 import { parseQueryString } from '../utils/parseQueryString';
@@ -93,7 +94,9 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
   componentDidMount() {
     const { pageContext, options } = this.props;
     const cookies = getCookies();
-    const hasCookie = cookies.has(Prismic.experimentCookie) || cookies.has(Prismic.previewCookie);
+    const hasCookie =
+      cookies.has(Prismic.experimentCookie) ||
+      Boolean(PreviewCookie.ref(this.props.options.repositoryName));
 
     if (pageContext.rootQuery && options.previews !== false && hasCookie) {
       const closeLoading = createLoadingScreen();

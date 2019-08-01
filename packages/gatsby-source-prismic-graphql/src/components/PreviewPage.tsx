@@ -3,6 +3,7 @@ import Prismic from 'prismic-javascript';
 import { linkResolver, getCookies } from '../utils';
 import { parseQueryString } from '../utils/parseQueryString';
 import pathToRegexp from 'path-to-regexp';
+import { Endpoints, PreviewCookie } from '../utils/prismic';
 
 interface Variation {
   id: string;
@@ -30,7 +31,7 @@ export default class PreviewPage extends React.Component<any> {
     const now = new Date();
     now.setHours(now.getHours() + 1);
 
-    const api = await Prismic.getApi(`https://${this.config.repositoryName}.cdn.prismic.io/api/v2`);
+    const api = await Prismic.getApi(Endpoints.v2(this.config.repositoryName));
 
     if (token) {
       await api.previewSession(token, linkResolver, '/');
@@ -67,7 +68,9 @@ export default class PreviewPage extends React.Component<any> {
     } else if (documentId) {
       const cookies = getCookies();
       const doc = await api.getByID(documentId);
-      const preview = cookies.has(Prismic.previewCookie) || cookies.has(Prismic.experimentCookie);
+      const preview =
+        Boolean(PreviewCookie.ref(this.config.repositoryName)) ||
+        cookies.has(Prismic.experimentCookie);
       this.redirect(preview && doc);
     }
   }

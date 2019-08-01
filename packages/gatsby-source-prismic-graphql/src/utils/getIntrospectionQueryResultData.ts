@@ -1,12 +1,16 @@
+import { Endpoints } from './prismic';
+
 export const getIntrospectionQueryResultData = ({ repositoryName }: any) =>
   new Promise((resolve, reject) => {
-    fetch(`https://${repositoryName}.prismic.io/api`)
+    fetch(Endpoints.v2(repositoryName))
       .then(r => r.json())
       .then((data: any) => {
         const ref = data.refs.find((r: any) => r.id === 'master');
         if (!ref) return;
         fetch(
-          `https://${repositoryName}.prismic.io/graphql?query=%7B%20__schema%20%7B%20types%20%7B%20kind%20name%20possibleTypes%20%7B%20name%20%7D%20%7D%20%7D%20%7D`,
+          `${Endpoints.graphql(
+            repositoryName
+          )}?query=%7B%20__schema%20%7B%20types%20%7B%20kind%20name%20possibleTypes%20%7B%20name%20%7D%20%7D%20%7D%20%7D`,
           {
             headers: {
               'prismic-ref': ref.ref,
