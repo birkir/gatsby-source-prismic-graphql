@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "root",
+  "name": "gatsby-source-prismic-graphql",
   "version": "3.4.0-beta.2",
   "workspaces": {
     "packages": [
