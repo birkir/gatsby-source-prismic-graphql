@@ -1,6 +1,6 @@
 {
   "private": false,
-  "name": "gatsby-source-prismic-graphql",
+  "name": "@lalmachado/gatsby-source-prismic-graphql",
   "description": "Source data from Prismic with GraphQL",
   "license": "MIT",
   "author": "Birkir Gudjonsson <birkir.gudjonsson@gmail.com>",
@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/birkir/gatsby-source-prismic-graphql/issues"
   },
-  "version": "3.4.0-beta.1",
+  "version": "3.4.0-beta.3",
   "main": "index.js",
   "files": [
     "*.js",
