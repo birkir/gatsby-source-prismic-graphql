@@ -27,7 +27,7 @@ const stripSharp = (query: any) => {
       this.parent.node.kind === 'Field' &&
       x.value.match(/Sharp$/)
     ) {
-      this.parent.remove();
+      this.parent.delete();
     }
   });
 };
