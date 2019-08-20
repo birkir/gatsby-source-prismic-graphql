@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.4.0-beta.2](https://github.com/gatsbyjs/gatsby-starter-default/compare/v3.4.0-beta.1...v3.4.0-beta.2) (2019-08-20)
+
+**Note:** Version bump only for package @examples/fragments
+
 # [3.4.0-beta.1](https://github.com/gatsbyjs/gatsby-starter-default/compare/v3.4.0-beta.0...v3.4.0-beta.1) (2019-07-29)
 
 **Note:** Version bump only for package @examples/fragments
