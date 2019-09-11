@@ -2,7 +2,7 @@ import path from 'path';
 import { getRootQuery } from 'gatsby-source-graphql-universal/getRootQuery';
 import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
 import { fieldName, PrismicLink, typeName } from './utils';
-import { Endpoints } from './utils/prismic';
+import { Endpoints, EditButton } from './utils/prismic';
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
 import pathToRegexp from 'path-to-regexp';
@@ -14,6 +14,7 @@ exports.onCreatePage = ({ page, actions }: any) => {
   page.context = page.context || {};
   if (rootQuery) {
     page.context.rootQuery = rootQuery;
+    page.context.headers = { [EditButton.HEADER_NAME]: page.path };
     actions.createPage(page);
   }
 };
@@ -103,12 +104,13 @@ function createDocumentPages(
   edges.forEach(({ cursor, node }: any, index: number) => {
     const previousNode = edges[index - 1] && edges[index - 1].node;
     const nextNode = edges[index + 1] && edges[index + 1].node;
-
+    const path = createDocumentPath(page, node, options.defaultLang);
     // ...and create the page
     createPage({
-      path: createDocumentPath(page, node, options.defaultLang),
+      path,
       component: page.component,
       context: {
+        headers: { [EditButton.HEADER_NAME]: path },
         rootQuery: getRootQuery(page.component),
         ...node._meta,
         cursor,

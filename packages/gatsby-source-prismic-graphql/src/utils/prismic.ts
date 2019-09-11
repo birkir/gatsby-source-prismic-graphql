@@ -69,3 +69,7 @@ export const PreviewCookie = {
     else return;
   },
 };
+
+export const EditButton = {
+  HEADER_NAME: 'prismic-editbutton-url',
+};

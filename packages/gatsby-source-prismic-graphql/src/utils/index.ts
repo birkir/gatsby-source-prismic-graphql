@@ -4,6 +4,7 @@ import { HttpOptions } from 'apollo-link-http-common';
 import Prismic from 'prismic-javascript';
 import { Endpoints } from './prismic';
 import { parseQueryString } from './parseQueryString';
+import { ApolloLink } from 'apollo-link';
 
 interface IPrismicLinkArgs extends HttpOptions {
   uri: string;
@@ -94,6 +95,21 @@ export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLi
       }
     );
 
+    const editButtonLink = new ApolloLink((operation, forward) => {
+      operation.setContext(({ headers }: { headers: Record<string, string> }) => {
+        const mainContext = operation.getContext().graphqlContext || {};
+        const pageContext = mainContext.context || {};
+        const pageHeaders = pageContext.headers;
+        return {
+          headers: {
+            ...headers,
+            ...pageHeaders,
+          },
+        };
+      });
+      return (forward && forward(operation)) || null;
+    });
+
     const httpLink = new HttpLink({
       uri,
       useGETForQueries: true,
@@ -101,7 +117,7 @@ export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLi
       fetch: fetchStripQueryWhitespace,
     });
 
-    return prismicLink.concat(httpLink);
+    return ApolloLink.from([prismicLink, editButtonLink, httpLink]);
   } else {
     throw new Error(`${uri} isn't a valid Prismic GraphQL endpoint`);
   }
