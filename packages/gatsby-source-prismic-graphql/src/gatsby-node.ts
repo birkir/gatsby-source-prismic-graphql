@@ -2,10 +2,10 @@ import path from 'path';
 import { getRootQuery } from 'gatsby-source-graphql-universal/getRootQuery';
 import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
 import { fieldName, PrismicLink, typeName } from './utils';
-import { Endpoints, EditButton } from './utils/prismic';
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
 import pathToRegexp from 'path-to-regexp';
+import { Endpoints, EditButton } from './utils/prismic';
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
@@ -219,14 +219,16 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   const pageCreators: Promise<any>[] = [];
 
   // Create pageCreator promises for each page/language combination
-  pages.forEach((page: Page): void => {
-    const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
-    if (langs) {
-      langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
-    } else {
-      pageCreators.push(createPagesForType(page));
+  pages.forEach(
+    (page: Page): void => {
+      const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
+      if (langs) {
+        langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
+      } else {
+        pageCreators.push(createPagesForType(page));
+      }
     }
-  });
+  );
 
   // Run all pageCreators simultaneously
   await Promise.all(pageCreators);
