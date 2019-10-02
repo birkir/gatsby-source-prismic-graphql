@@ -195,12 +195,13 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     }
 
     const response = data.prismic[documentType];
+    const edges = page.filter ? response.edges.filter(page.filter) : response.edges;
 
     // Add last end cursor to all edges to enable pagination context when creating pages
-    response.edges.forEach((edge: any) => (edge.endCursor = endCursor));
+    edges.forEach((edge: any) => (edge.endCursor = endCursor));
 
     // Stage documents for page creation
-    documents = [...documents, ...response.edges] as [any?];
+    documents = [...documents, ...edges] as [any?];
 
     if (response.pageInfo.hasNextPage) {
       const newEndCursor: string = response.pageInfo.endCursor;
