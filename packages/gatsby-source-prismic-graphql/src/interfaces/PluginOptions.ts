@@ -1,10 +1,15 @@
 export interface Page {
   type: string;
-  match: string;
+  match?: string;
   path: string;
   component: string;
   langs?: string[];
   sortBy?: string;
+  queryParams?: {
+    query: string;
+  } & {
+    [key: string]: (node: any) => string;
+  };
 }
 
 export interface PluginOptions {

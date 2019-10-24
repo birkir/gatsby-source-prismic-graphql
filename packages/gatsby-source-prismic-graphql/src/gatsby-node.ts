@@ -1,10 +1,9 @@
 import path from 'path';
 import { getRootQuery } from 'gatsby-source-graphql-universal/getRootQuery';
 import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
-import { fieldName, PrismicLink, typeName } from './utils';
+import { fieldName, PrismicLink, typeName, createDocumentPath } from './utils';
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
-import pathToRegexp from 'path-to-regexp';
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
@@ -64,34 +63,6 @@ function createDocumentPreviewPage(createPage: Function, page: Page, lang?: stri
   });
 }
 
-/**
- * Create URL paths interpolating `:uid` and `:lang` or `:lang?` with actual values.
- * @param pageOptions - Returned paths are based on the `match` or `path` (if `match`
- * is not present) properties of the `pageOptions` object.
- * @param node - Document node metadata provide the `lang` and `uid` values for the returned path.
- * @param defaultLang - `defaultLang` as declared in `PluginOptions`. If `lang` segment is
- * marked optional (`:lang?`) in the page `match` or `path` values and `defaultLang` matches the
- * document's actual language, the language segment of the path will be omitted in the returned path.
- * @return The path for the document's URL with `lang` and `uid` interpolated as necessary.
- */
-function createDocumentPath(pageOptions: Page, node: any, defaultLang?: string): string {
-  const pathKeys: any[] = [];
-  const pathTemplate: string = pageOptions.match || pageOptions.path;
-  pathToRegexp(pathTemplate, pathKeys);
-  const langKey = pathKeys.find(key => key.name === 'lang');
-  const isLangOptional: boolean = !!(langKey && langKey.optional);
-  const toPath: Function = pathToRegexp.compile(pathTemplate);
-
-  const documentLang: string = node._meta.lang;
-  const isDocumentLangDefault: boolean = documentLang === defaultLang;
-  const shouldExcludeLangInPath: boolean = isLangOptional && isDocumentLangDefault;
-  const lang: string | null = shouldExcludeLangInPath ? null : documentLang;
-
-  const params = { ...node._meta, lang };
-  const path: string = toPath(params);
-  return path === '' ? '/' : path;
-}
-
 function createDocumentPages(
   createPage: Function,
   edges: [any?],
@@ -126,9 +97,11 @@ function createDocumentPages(
 
 const getDocumentsQuery = ({
   documentType,
+  queryParams,
   sortType,
 }: {
   documentType: string;
+  queryParams?: string;
   sortType: string;
 }): string => `
   query AllPagesQuery ($after: String, $lang: String, $sortBy: ${sortType}) {
@@ -159,6 +132,7 @@ const getDocumentsQuery = ({
                 uid
               }
             }
+            ${queryParams || ''}
           }
         }
       }
@@ -183,7 +157,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     // Prepare and execute query
     const documentType: string = `all${page.type}s`;
     const sortType: string = `PRISMIC_Sort${page.type}y`;
-    const query: string = getDocumentsQuery({ documentType, sortType });
+    const queryParams = page.queryParams && page.queryParams.query;
+    const query: string = getDocumentsQuery({ documentType, queryParams, sortType });
     const { data, errors } = await graphql(query, {
       after: endCursor,
       lang: lang || null,

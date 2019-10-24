@@ -17,7 +17,7 @@ export const fieldName = 'prismic';
 export const typeName = 'PRISMIC';
 
 // keep link resolver function
-export let linkResolver: (doc: any) => string = () => '/';
+export let linkResolver: ((doc: any) => string) | undefined;
 
 export function registerLinkResolver(link: typeof linkResolver) {
   linkResolver = link;
@@ -106,3 +106,5 @@ export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLi
     throw new Error(`${uri} isn't a valid Prismic GraphQL endpoint`);
   }
 }
+
+export { createDocumentPath } from './createDocumentPath';

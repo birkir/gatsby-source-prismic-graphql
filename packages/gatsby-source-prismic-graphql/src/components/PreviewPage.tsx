@@ -2,6 +2,7 @@ import React from 'react';
 import Prismic from 'prismic-javascript';
 import { linkResolver, getCookies } from '../utils';
 import { parseQueryString } from '../utils/parseQueryString';
+import { Page } from '../interfaces/PluginOptions';
 import pathToRegexp from 'path-to-regexp';
 
 interface Variation {
@@ -18,6 +19,19 @@ export default class PreviewPage extends React.Component<any> {
   get config() {
     return this.props.prismic.options;
   }
+  // generateDefaultLinkResolver(pages: Page[] = [], defaultLang?: string): (doc: any) => string {
+  //   return (docApiV2: any) => {
+  //     const doc = this.convertDocToGraphQLFormat(docApiV2)
+
+  //     const pageConfig = pages.find(p => {
+  //       const docType = doc && ((doc._meta && doc._meta.type) || doc.type)
+  //       return p.type.toLowerCase() === docType.toLowerCase()
+  //     });
+  //     const generatedPath = pageConfig && createDocumentPath(pageConfig, doc, defaultLang)
+
+  //     return generatedPath || '/';
+  //   }
+  // }
 
   public async preview() {
     const { location } = this.props;
