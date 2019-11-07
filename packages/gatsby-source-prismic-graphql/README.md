@@ -187,6 +187,12 @@ For Noticias, however, we only want to generate pages for Spanish documents of t
 
 This is an example of how these three properties can be used together to offer maximum flexibility. To see this in action, check out the [languages example app](https://github.com/birkir/gatsby-source-prismic-graphql/tree/master/examples/languages).
 
+#### (Optional) Short language codes
+
+To use short language codes (_e.g. `/fr/articles`_) instead of the default (_e.g. `/fr-fr/articles`_), you can set `options.shortenUrlLangs` to `true`.
+
+Keep in mind that if you use this option & have multiple variants of a language (e.g. _en-us_ and _en-au_) that would be shortened to the same value, you should add UIDs to your URLs to differentiate them.
+
 ### Page Queries: Fetch Data From Prismic
 
 It is very easy to fetch data from Prismic in your pages:

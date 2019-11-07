@@ -15,6 +15,7 @@ export interface PluginOptions {
   linkResolver?: Function;
   defaultLang?: string;
   langs?: string[];
+  shortenUrlLangs?: boolean;
   passContextKeys?: string[];
   previewPath?: string;
   previews?: boolean;
