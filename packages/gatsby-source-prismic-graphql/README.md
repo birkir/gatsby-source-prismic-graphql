@@ -178,7 +178,7 @@ export const query = graphql`
 
 export default function Page({ data }) => <>
   <h1>{RichText.render(data.prismic.title)}</h1>
-  <h2>{RichText.render(data.prismic.description)}</h1>
+  <h2>{RichText.render(data.prismic.description)}</h2>
 </>
 ```
 
