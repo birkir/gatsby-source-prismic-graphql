@@ -5,6 +5,7 @@ export interface Page {
   component: string;
   langs?: string[];
   sortBy?: string;
+  filter?: Function;
 }
 
 export interface PluginOptions {
