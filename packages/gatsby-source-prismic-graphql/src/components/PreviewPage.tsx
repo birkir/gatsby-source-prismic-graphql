@@ -13,6 +13,7 @@ interface Variation {
 
 export default class PreviewPage extends React.Component<any> {
   public componentDidMount() {
+    console.log('preview page');
     this.preview();
   }
 
@@ -82,30 +83,32 @@ export default class PreviewPage extends React.Component<any> {
     }
 
     const link = linkResolver(doc);
-
-    const urlWithQueryString = (this.config.pages || [])
-      .map((page: any) => {
-        const keys: any = [];
-        const re = pathToRegexp(page.match, keys);
-        const match = re.exec(link);
-        const delimiter = (str: string) => (str.indexOf('?') === -1 ? '?' : '&');
-        if (match) {
-          return match
-            .slice(1)
-            .reduce(
-              (acc, value, i) =>
-                acc + (keys[i] ? `${delimiter(acc)}${keys[i].name}=${value}` : value),
-              page.path
-            );
-        }
-        return null;
-      })
-      .find((n: any) => !!n);
-
     const exists = (await fetch(link).then(res => res.status)) === 200;
 
-    if (!exists && urlWithQueryString) {
-      window.location = urlWithQueryString;
+    if (!exists) {
+      const urlWithQueryString = (this.config.pages || [])
+        .map((page: any) => {
+          const keys: any = [];
+          if (!page.match) return page.path;
+
+          const re = pathToRegexp(page.match, keys);
+          const match = re.exec(link);
+          const delimiter = (str: string) => (str.indexOf('?') === -1 ? '?' : '&');
+          if (match) {
+            return match
+              .slice(1)
+              .reduce(
+                (acc, value, i) =>
+                  acc + (keys[i] ? `${delimiter(acc)}${keys[i].name}=${value}` : value),
+                page.path
+              );
+          }
+          return null;
+        })
+        .find((n: any) => !!n);
+
+      if (urlWithQueryString) window.location = urlWithQueryString;
+      else window.location = link as any;
     } else {
       window.location = link as any;
     }
