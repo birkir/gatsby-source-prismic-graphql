@@ -5,6 +5,7 @@ export interface Page {
   component: string;
   langs?: string[];
   sortBy?: string;
+  filter?: Function;
 }
 
 export interface PluginOptions {
@@ -14,6 +15,7 @@ export interface PluginOptions {
   linkResolver?: Function;
   defaultLang?: string;
   langs?: string[];
+  shortenUrlLangs?: boolean;
   passContextKeys?: string[];
   previewPath?: string;
   previews?: boolean;

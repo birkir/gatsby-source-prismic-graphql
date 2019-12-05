@@ -111,6 +111,36 @@ If you create a new unpublished blogpost, `baz` it will be accessible for previe
 
 More on [Prismic Previews](#prismic-previews) below.
 
+#### Conditionally generating pages
+
+If the default page generation doesn't cover your use-case, you can provide an optional `filter` option to your individual page configurations.
+
+For example, if you had a single Prismic _Article_ type and wanted pages with `music` in their UIDs to be generated at a different URL :
+
+```js
+{
+  pages: [{
+    type: 'Article',
+    match: '/musicblog/:uid',
+    filter: data => data.node._meta.uid.includes('music'),
+    path: '/blogposts',
+    component: require.resolve('./src/templates/article.js'),
+  }, {
+    type: 'Article',
+    match: '/blog/:uid',
+    filter: data => !data.node._meta.uid.includes('music'),
+    path: '/blogposts',
+    component: require.resolve('./src/templates/article.js'),
+  }],
+}
+```
+
+Given 3 articles with UIDs of `why-i-like-music`, `why-i-like-sports` and `why-i-like-food`, the following URL slugs will be generated:
+
+- `/musicblog/why-i-like-music`
+- `/blog/why-i-like-sports`
+- `/blog/why-i-like-food`
+
 ### Support for Multiple Languages
 
 Prismic allows you to create your content in multiple languages. This library supports that too. When setting up your configuration options in `gatsby-config.js`, there are three _optional_ properties you should be aware of: `options.defaultLang`, `options.langs`, and `options.pages[i].langs`. In the following example, all are in use:
@@ -157,6 +187,12 @@ For Noticias, however, we only want to generate pages for Spanish documents of t
 
 This is an example of how these three properties can be used together to offer maximum flexibility. To see this in action, check out the [languages example app](https://github.com/birkir/gatsby-source-prismic-graphql/tree/master/examples/languages).
 
+#### (Optional) Short language codes
+
+To use short language codes (_e.g. `/fr/articles`_) instead of the default (_e.g. `/fr-fr/articles`_), you can set `options.shortenUrlLangs` to `true`.
+
+Keep in mind that if you use this option & have multiple variants of a language (e.g. _en-us_ and _en-au_) that would be shortened to the same value, you should add UIDs to your URLs to differentiate them.
+
 ### Page Queries: Fetch Data From Prismic
 
 It is very easy to fetch data from Prismic in your pages:
@@ -178,7 +214,7 @@ export const query = graphql`
 
 export default function Page({ data }) => <>
   <h1>{RichText.render(data.prismic.title)}</h1>
-  <h2>{RichText.render(data.prismic.description)}</h1>
+  <h2>{RichText.render(data.prismic.description)}</h2>
 </>
 ```
 

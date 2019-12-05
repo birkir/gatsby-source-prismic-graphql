@@ -71,12 +71,18 @@ function createDocumentPreviewPage(createPage: Function, page: Page, lang?: stri
  * @param pageOptions - Returned paths are based on the `match` or `path` (if `match`
  * is not present) properties of the `pageOptions` object.
  * @param node - Document node metadata provide the `lang` and `uid` values for the returned path.
- * @param defaultLang - `defaultLang` as declared in `PluginOptions`. If `lang` segment is
+ * @param options - The plugin's global options.
+ * @param options.defaultLang - `defaultLang` as declared in `PluginOptions`. If `lang` segment is
  * marked optional (`:lang?`) in the page `match` or `path` values and `defaultLang` matches the
  * document's actual language, the language segment of the path will be omitted in the returned path.
+ * @param options.shortenUrlLangs - When truthy, the lang used for the path will be limited to 2 characters.
  * @return The path for the document's URL with `lang` and `uid` interpolated as necessary.
  */
-function createDocumentPath(pageOptions: Page, node: any, defaultLang?: string): string {
+function createDocumentPath(
+  pageOptions: Page,
+  node: any,
+  { defaultLang, shortenUrlLangs }: PluginOptions
+): string {
   const pathKeys: any[] = [];
   const pathTemplate: string = pageOptions.match || pageOptions.path;
   pathToRegexp(pathTemplate, pathKeys);
@@ -87,7 +93,8 @@ function createDocumentPath(pageOptions: Page, node: any, defaultLang?: string):
   const documentLang: string = node._meta.lang;
   const isDocumentLangDefault: boolean = documentLang === defaultLang;
   const shouldExcludeLangInPath: boolean = isLangOptional && isDocumentLangDefault;
-  const lang: string | null = shouldExcludeLangInPath ? null : documentLang;
+  const displayedLang: string = shortenUrlLangs ? documentLang.slice(0, 2) : documentLang;
+  const lang: string | null = shouldExcludeLangInPath ? null : displayedLang;
 
   const params = { ...node._meta, lang };
   const path: string = toPath(params);
@@ -104,7 +111,7 @@ function createDocumentPages(
   edges.forEach(({ cursor, node }: any, index: number) => {
     const previousNode = edges[index - 1] && edges[index - 1].node;
     const nextNode = edges[index + 1] && edges[index + 1].node;
-    const path = createDocumentPath(page, node, options.defaultLang);
+    const path = createDocumentPath(page, node, options);
     // ...and create the page
     createPage({
       path,
@@ -198,12 +205,13 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     }
 
     const response = data.prismic[documentType];
+    const edges = page.filter ? response.edges.filter(page.filter) : response.edges;
 
     // Add last end cursor to all edges to enable pagination context when creating pages
-    response.edges.forEach((edge: any) => (edge.endCursor = endCursor));
+    edges.forEach((edge: any) => (edge.endCursor = endCursor));
 
     // Stage documents for page creation
-    documents = [...documents, ...response.edges] as [any?];
+    documents = [...documents, ...edges] as [any?];
 
     if (response.pageInfo.hasNextPage) {
       const newEndCursor: string = response.pageInfo.endCursor;
