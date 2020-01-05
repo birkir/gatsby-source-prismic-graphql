@@ -6,7 +6,7 @@ interface OnRenderBodyArgs {
 }
 
 exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: PluginOptions) => {
-  const accessToken = options.previews ? null : options.accessToken;
+  const accessToken = options.previews ? options.accessToken : null;
 
   const components = [
     <script
