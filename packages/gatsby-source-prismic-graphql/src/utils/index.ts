@@ -49,6 +49,8 @@ export function fetchStripQueryWhitespace(url: string, ...args: any) {
         .replace(/\s?\:\s?/g, ':')
         .replace(/\s?\(\s?/g, '(')
         .replace(/\s?\)\s?/g, ')')
+        .replace(/\.\.\.\s/g, '...')
+        .replace(/\,\s/g, ',')
     );
   }
   const updatedQs = Array.from(queryString)
