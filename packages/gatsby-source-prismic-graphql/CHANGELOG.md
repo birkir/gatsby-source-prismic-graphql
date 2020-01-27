@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.4.0](https://github.com/birkir/gatsby-source-prismic-graphql/compare/v3.4.0-beta.2...v3.4.0) (2020-01-27)
+
+### Features
+
+- add filter explanation to README ([4ff8a62](https://github.com/birkir/gatsby-source-prismic-graphql/commit/4ff8a62))
+- add optional filter to page options ([8bb76aa](https://github.com/birkir/gatsby-source-prismic-graphql/commit/8bb76aa))
+- support short language codes in generated paths ([cf559d6](https://github.com/birkir/gatsby-source-prismic-graphql/commit/cf559d6))
+
 # [3.4.0-beta.2](https://github.com/birkir/gatsby-source-prismic-graphql/compare/v3.4.0-beta.1...v3.4.0-beta.2) (2019-08-20)
 
 ### Bug Fixes
