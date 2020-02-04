@@ -8,6 +8,14 @@ import pathToRegexp from 'path-to-regexp';
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
+let accessToken: string | null | undefined;
+exports.onPreInit = (_: any, options: PluginOptions) => {
+  accessToken = options.accessToken;
+  if (!options.previews) {
+    delete options.accessToken;
+  }
+};
+
 exports.onCreatePage = ({ page, actions }: any) => {
   const rootQuery = getRootQuery(page.componentPath);
   page.context = page.context || {};
@@ -25,7 +33,7 @@ exports.sourceNodes = (ref: any, options: PluginOptions) => {
       PrismicLink({
         uri: `https://${options.repositoryName}.prismic.io/graphql`,
         credentials: 'same-origin',
-        accessToken: options.accessToken as any,
+        accessToken: accessToken as any,
         customRef: options.prismicRef as any,
       }),
     ...options,
