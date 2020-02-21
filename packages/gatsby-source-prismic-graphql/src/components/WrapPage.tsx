@@ -1,5 +1,6 @@
 import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
-import { pick, get } from 'lodash';
+import pick from 'lodash/pick';
+import get from 'lodash/get';
 import pathToRegexp from 'path-to-regexp';
 import Prismic from 'prismic-javascript';
 import React from 'react';
