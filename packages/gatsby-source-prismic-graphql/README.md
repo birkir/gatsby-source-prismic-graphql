@@ -64,6 +64,7 @@ yarn add gatsby-source-prismic-graphql
       component: require.resolve('./src/templates/article.js'),
       sortBy: 'date_ASC', // optional, default: meta_lastPublicationDate_ASC; useful for pagination
     }],
+    extraPageFields: 'article_type', // optional, extends pages query to pass extra fields
     sharpKeys: [
       /image|photo|picture/, // (default)
       'profilepic',
@@ -140,6 +141,34 @@ Given 3 articles with UIDs of `why-i-like-music`, `why-i-like-sports` and `why-i
 - `/musicblog/why-i-like-music`
 - `/blog/why-i-like-sports`
 - `/blog/why-i-like-food`
+
+### Generating pages from page fields
+
+Sometimes the meta provided by default doesn't contain enough context to be able to filter pages effectively. By passing `extraPageFields` to the plugin options, we can extend what we can filter on.
+
+```js
+{
+  extraPageFields: 'music_genre',
+  pages: [{
+    type: 'Article',
+    match: '/techno/:uid',
+    filter: data => data.node.music_genre === 'techno',
+    path: '/blogposts',
+    component: require.resolve('./src/templates/article.js'),
+  }, {
+    type: 'Article',
+    match: '/acoustic/:uid',
+    filter: data => data.node.music_genre === 'acoustic',
+    path: '/blogposts',
+    component: require.resolve('./src/templates/article.js'),
+  }]
+}
+```
+
+Given 2 articles with the `music_genre` field set, we'll get the following slugs:
+
+/techno/darude
+/acoustic/mik-parsons
 
 ### Support for Multiple Languages
 
