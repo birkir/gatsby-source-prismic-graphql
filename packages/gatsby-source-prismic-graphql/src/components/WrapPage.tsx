@@ -7,7 +7,7 @@ import traverse from 'traverse';
 import { fieldName, getCookies, typeName } from '../utils';
 import { createLoadingScreen } from '../utils/createLoadingScreen';
 import { getApolloClient } from '../utils/getApolloClient';
-import { parseQueryString } from '../utils/parseQueryString';
+import { parseQueryString, parseQueryStringAsJson } from '../utils/parseQueryString';
 
 const queryOrSource = (obj: any) => {
   if (typeof obj === 'string') {
@@ -53,22 +53,22 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
     const keys: any = [];
     const re = pathToRegexp(get(this.props.pageContext, 'matchPath', ''), keys);
     const match = re.exec(get(this.props, 'location.pathname', ''));
-    if (match) {
-      keys.forEach((value: any, index: number) => {
-        if (!params[value.name]) {
-          params[value.name] = match[index + 1];
-        }
-      });
-    }
 
-    const qs = parseQueryString(String(get(this.props, 'location.search', '?')).substr(1));
-    this.keys.forEach((key: string) => {
-      if (!params[key] && qs.has(key)) {
-        params[key] = qs.get(key);
-      }
+    const matchFn = pathToRegexp.match(get(this.props.pageContext, 'matchPath', ''), {
+      decode: decodeURIComponent,
     });
 
-    return params;
+    const pathParams = (() => {
+      const res = matchFn(get(this.props, 'location.pathname', ''));
+      return res.params;
+    })();
+
+    const qsParams = (() => {
+      const qsValue = String(get(this.props, 'location.search', '?')).substr(1);
+      return parseQueryStringAsJson(qsValue);
+    })();
+
+    return Object.assign(params, qsParams, pathParams);
   }
 
   getQuery() {

@@ -55,7 +55,7 @@ function createDocumentPreviewPage(createPage: Function, page: Page, lang?: stri
       rootQuery,
       id: '',
       uid: '',
-      lang,
+      lang: lang,
       paginationPreviousUid: '',
       paginationPreviousLang: '',
       paginationNextUid: '',
@@ -214,7 +214,6 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       const newEndCursor: string = response.pageInfo.endCursor;
       await createPagesForType(page, lang, newEndCursor, documents);
     } else {
-      createDocumentPreviewPage(createPage, page, lang);
       createDocumentPages(createPage, documents, options, page);
     }
   }
@@ -232,6 +231,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       } else {
         pageCreators.push(createPagesForType(page));
       }
+      createDocumentPreviewPage(createPage, page, options.defaultLang);
     }
   );
 
