@@ -4,7 +4,7 @@ import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-univer
 import { fieldName, PrismicLink, typeName } from './utils';
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
-import pathToRegexp from 'path-to-regexp';
+import { pathToRegexp, compile as compilePath } from 'path-to-regexp';
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
 
@@ -86,7 +86,7 @@ function createDocumentPath(
   pathToRegexp(pathTemplate, pathKeys);
   const langKey = pathKeys.find(key => key.name === 'lang');
   const isLangOptional: boolean = !!(langKey && langKey.optional);
-  const toPath: Function = pathToRegexp.compile(pathTemplate);
+  const toPath: Function = compilePath(pathTemplate);
 
   const documentLang: string = node._meta.lang;
   const isDocumentLangDefault: boolean = documentLang === defaultLang;

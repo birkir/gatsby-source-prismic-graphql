@@ -2,7 +2,7 @@ import React from 'react';
 import Prismic from 'prismic-javascript';
 import { linkResolver, getCookies } from '../utils';
 import { parseQueryString } from '../utils/parseQueryString';
-import pathToRegexp from 'path-to-regexp';
+import { pathToRegexp, Key } from 'path-to-regexp';
 
 interface Variation {
   id: string;
@@ -81,16 +81,16 @@ export default class PreviewPage extends React.Component<any> {
     const link = linkResolver(doc);
 
     const urlWithQueryString = (this.config.pages || [])
-      .map((page: any) => {
-        const keys: any = [];
-        const re = pathToRegexp(page.match, keys);
+      .map((page: { match: string; path: string }) => {
+        const keys: Key[] = [];
+        const re: RegExp = pathToRegexp(page.match, keys);
         const match = re.exec(link);
         const delimiter = (str: string) => (str.indexOf('?') === -1 ? '?' : '&');
         if (match) {
           return match
             .slice(1)
             .reduce(
-              (acc, value, i) =>
+              (acc: string, value: string, i: number) =>
                 acc + (keys[i] ? `${delimiter(acc)}${keys[i].name}=${value}` : value),
               page.path
             );

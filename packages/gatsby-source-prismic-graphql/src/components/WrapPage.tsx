@@ -1,6 +1,6 @@
 import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
 import { pick, get } from 'lodash';
-import pathToRegexp from 'path-to-regexp';
+import { pathToRegexp, match as matchRegex, Key } from 'path-to-regexp';
 import Prismic from 'prismic-javascript';
 import React from 'react';
 import traverse from 'traverse';
@@ -50,17 +50,17 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
   get params() {
     const params: any = { ...this.props.pageContext };
 
-    const keys: any = [];
+    const keys: Key[] = [];
     const re = pathToRegexp(get(this.props.pageContext, 'matchPath', ''), keys);
     const match = re.exec(get(this.props, 'location.pathname', ''));
 
-    const matchFn = pathToRegexp.match(get(this.props.pageContext, 'matchPath', ''), {
+    const matchFn = matchRegex(get(this.props.pageContext, 'matchPath', ''), {
       decode: decodeURIComponent,
     });
 
     const pathParams = (() => {
       const res = matchFn(get(this.props, 'location.pathname', ''));
-      return res.params;
+      return res === false ? '' : res.params;
     })();
 
     const qsParams = (() => {

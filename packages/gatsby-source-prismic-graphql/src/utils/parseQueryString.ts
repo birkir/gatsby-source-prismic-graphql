@@ -12,7 +12,19 @@ export function parseQueryString(qs: string, delimiter: string = '&'): Map<strin
 export function parseQueryStringAsJson(
   qs: string = '',
   delimiter: string = '&'
-): Map<string, string> {
+): { [key: string]: string } {
   const qsMap = parseQueryString(qs, delimiter);
-  return Object.fromEntries(qsMap);
+
+  console.log('qsMap', qsMap);
+
+  const qsMapIterator = qsMap[Symbol.iterator]();
+
+  const qsJSON: { [key: string]: string } = {};
+
+  for (let item of qsMapIterator) {
+    const keyJSON = item[0];
+    const value = item[1];
+    qsJSON[keyJSON] = value;
+  }
+  return qsJSON;
 }
