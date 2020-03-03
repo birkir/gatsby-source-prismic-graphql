@@ -14,11 +14,7 @@ export function parseQueryStringAsJson(
   delimiter: string = '&'
 ): { [key: string]: string } {
   const qsMap = parseQueryString(qs, delimiter);
-
-  console.log('qsMap', qsMap);
-
   const qsMapIterator = qsMap[Symbol.iterator]();
-
   const qsJSON: { [key: string]: string } = {};
 
   for (let item of qsMapIterator) {

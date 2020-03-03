@@ -60,7 +60,7 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
 
     const pathParams = (() => {
       const res = matchFn(get(this.props, 'location.pathname', ''));
-      return res === false ? '' : res.params;
+      return res ? res.params : {};
     })();
 
     const qsParams = (() => {
