@@ -1,5 +1,5 @@
 import { graphql, Link } from 'gatsby';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import React, { useEffect, useRef } from 'react';
 import { getCursorFromDocumentIndex } from 'gatsby-source-prismic-graphql';
 import Layout from '../components/layout';
