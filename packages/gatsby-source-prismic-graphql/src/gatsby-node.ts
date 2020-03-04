@@ -104,7 +104,7 @@ function createDocumentPath(
   const lang: string | null = shouldExcludeLangInPath ? null : displayedLang;
 
   const params = { ...node._meta, lang };
-  const path: string = toPath(params);
+  const path: string = decodeURI(toPath(params));
   return path === '' ? '/' : path;
 }
 
