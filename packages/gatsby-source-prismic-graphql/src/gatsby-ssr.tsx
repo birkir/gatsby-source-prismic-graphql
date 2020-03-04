@@ -6,8 +6,6 @@ interface OnRenderBodyArgs {
 }
 
 exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: PluginOptions) => {
-  const accessToken = options.previews ? null : options.accessToken;
-
   const components = [
     <script
       key="prismic-config"
@@ -16,7 +14,7 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: Plugin
             window.prismic = {
               endpoint: 'https://${options.repositoryName}.prismic.io/api/v2',
             };
-            window.prismicGatsbyOptions = ${JSON.stringify({ ...options, accessToken })};
+            window.prismicGatsbyOptions = ${JSON.stringify(options)};
           `,
       }}
     />,
