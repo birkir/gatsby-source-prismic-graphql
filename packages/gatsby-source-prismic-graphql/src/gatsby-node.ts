@@ -4,9 +4,19 @@ import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-univer
 import { fieldName, PrismicLink, typeName } from './utils';
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
+
 import { pathToRegexp, compile as compilePath } from 'path-to-regexp';
+import querystring from 'querystring';
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
+
+let accessToken: string | null | undefined;
+exports.onPreInit = (_: any, options: PluginOptions) => {
+  accessToken = options.accessToken;
+  if (!options.previews) {
+    delete options.accessToken;
+  }
+};
 
 exports.onCreatePage = ({ page, actions }: any) => {
   const rootQuery = getRootQuery(page.componentPath);
@@ -25,7 +35,7 @@ exports.sourceNodes = (ref: any, options: PluginOptions) => {
       PrismicLink({
         uri: `https://${options.repositoryName}.prismic.io/graphql`,
         credentials: 'same-origin',
-        accessToken: options.accessToken as any,
+        accessToken: accessToken as any,
         customRef: options.prismicRef as any,
       }),
     ...options,
@@ -95,7 +105,7 @@ function createDocumentPath(
   const lang: string | null = shouldExcludeLangInPath ? null : displayedLang;
 
   const params = { ...node._meta, lang };
-  const path: string = toPath(params);
+  const path: string = decodeURI(toPath(params));
   return path === '' ? '/' : path;
 }
 
@@ -134,9 +144,11 @@ function createDocumentPages(
 const getDocumentsQuery = ({
   documentType,
   sortType,
+  extraPageFields,
 }: {
   documentType: string;
   sortType: string;
+  extraPageFields: string;
 }): string => `
   query AllPagesQuery ($after: String, $lang: String, $sortBy: ${sortType}) {
     prismic {
@@ -154,6 +166,7 @@ const getDocumentsQuery = ({
         edges {
           cursor
           node {
+            ${extraPageFields}
             _meta {
               id
               lang
@@ -190,7 +203,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     // Prepare and execute query
     const documentType: string = `all${page.type}s`;
     const sortType: string = `PRISMIC_Sort${page.type}y`;
-    const query: string = getDocumentsQuery({ documentType, sortType });
+    const extraPageFields = options.extraPageFields || '';
+    const query: string = getDocumentsQuery({ documentType, sortType, extraPageFields });
     const { data, errors } = await graphql(query, {
       after: endCursor,
       lang: lang || null,
@@ -272,7 +286,7 @@ exports.createResolvers = (
             const url = args.crop ? obj[args.crop] && obj[args.crop].url : obj.url;
             if (url) {
               return createRemoteFileNode({
-                url,
+                url: querystring.unescape(url),
                 store,
                 cache,
                 createNode,

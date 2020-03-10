@@ -2,7 +2,7 @@ import React from 'react';
 import { RichText } from 'prismic-reactjs';
 import { graphql } from 'gatsby';
 import { linkResolver } from '../prismic/linkResolver';
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 export const query = graphql`
   query BlogPost($uid: String) {

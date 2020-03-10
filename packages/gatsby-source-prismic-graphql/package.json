@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/birkir/gatsby-source-prismic-graphql/issues"
   },
-  "version": "3.4.0",
+  "version": "3.5.0",
   "main": "index.js",
   "files": [
     "*.js",
@@ -33,7 +33,7 @@
     "apollo-link-context": "^1.0.17",
     "gatsby-image": "^2.2.4",
     "gatsby-source-filesystem": "^2.1.2",
-    "gatsby-source-graphql": "^2.0.15",
+    "gatsby-source-graphql": "^2.1.32",
     "gatsby-source-graphql-universal": "^3.1.6",
     "path-to-regexp": "^6.0.0",
     "prismic-javascript": "^2.1.1",

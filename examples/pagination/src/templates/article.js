@@ -1,6 +1,6 @@
 import { graphql, Link } from 'gatsby';
 import { linkResolver } from 'gatsby-source-prismic-graphql';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { RichText } from 'prismic-reactjs';
 import React from 'react';
 import Layout from '../components/layout';
