@@ -2,7 +2,7 @@ import React from 'react';
 import Prismic from 'prismic-javascript';
 import { linkResolver, getCookies } from '../utils';
 import { parseQueryString } from '../utils/parseQueryString';
-import pathToRegexp from 'path-to-regexp';
+import { pathToRegexp } from 'path-to-regexp';
 
 interface Variation {
   id: string;

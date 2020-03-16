@@ -4,7 +4,7 @@ import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-univer
 import { fieldName, PrismicLink, typeName } from './utils';
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
-import pathToRegexp from 'path-to-regexp';
+import { pathToRegexp, compile } from 'path-to-regexp';
 import querystring from 'querystring';
 
 exports.onCreateWebpackConfig = onCreateWebpackConfig;
@@ -95,7 +95,7 @@ function createDocumentPath(
   pathToRegexp(pathTemplate, pathKeys);
   const langKey = pathKeys.find(key => key.name === 'lang');
   const isLangOptional: boolean = !!(langKey && langKey.optional);
-  const toPath: Function = pathToRegexp.compile(pathTemplate);
+  const toPath: Function = compile(pathTemplate);
 
   const documentLang: string = node._meta.lang;
   const isDocumentLangDefault: boolean = documentLang === defaultLang;
@@ -237,16 +237,14 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   const pageCreators: Promise<any>[] = [];
 
   // Create pageCreator promises for each page/language combination
-  pages.forEach(
-    (page: Page): void => {
-      const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
-      if (langs) {
-        langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
-      } else {
-        pageCreators.push(createPagesForType(page));
-      }
+  pages.forEach((page: Page): void => {
+    const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
+    if (langs) {
+      langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
+    } else {
+      pageCreators.push(createPagesForType(page));
     }
-  );
+  });
 
   // Run all pageCreators simultaneously
   await Promise.all(pageCreators);
