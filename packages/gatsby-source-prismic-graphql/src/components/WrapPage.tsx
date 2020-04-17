@@ -5,10 +5,12 @@ import pathToRegexp from 'path-to-regexp';
 import Prismic from 'prismic-javascript';
 import React from 'react';
 import traverse from 'traverse';
-import { fieldName, getCookies, typeName } from '../utils';
+import { getCookies } from '../utils';
 import { createLoadingScreen } from '../utils/createLoadingScreen';
 import { getApolloClient } from '../utils/getApolloClient';
 import { parseQueryString } from '../utils/parseQueryString';
+import { PluginOptions } from '../interfaces/PluginOptions';
+import { defaultPluginOptions } from '../utils/defaultPluginOptions';
 
 const queryOrSource = (obj: any) => {
   if (typeof obj === 'string') {
@@ -33,13 +35,21 @@ const stripSharp = (query: any) => {
   });
 };
 
+interface WrapPageProps {
+  options: PluginOptions;
+  data?: unknown;
+  pageContext: {
+    rootQuery?: unknown;
+  };
+}
+
 interface WrapPageState {
   data: any;
   loading: boolean;
   error: Error | null;
 }
 
-export class WrapPage extends React.PureComponent<any, WrapPageState> {
+export class WrapPage extends React.PureComponent<WrapPageProps, WrapPageState> {
   state: WrapPageState = {
     data: this.props.data,
     loading: false,
@@ -129,6 +139,11 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
 
     const keys = [...(this.props.options.passContextKeys || []), ...this.keys];
     variables = { ...pick(this.params, keys), ...variables };
+
+    const {
+      fieldName = defaultPluginOptions.fieldName,
+      typeName = defaultPluginOptions.typeName,
+    } = this.props.options;
 
     return getApolloClient(this.props.options).then(client => {
       return client.query({
