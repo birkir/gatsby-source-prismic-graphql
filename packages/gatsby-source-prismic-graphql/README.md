@@ -59,8 +59,8 @@ yarn add gatsby-source-prismic-graphql
     previews: true, // optional, default: false
     pages: [{ // optional
       type: 'Article', // TypeName from prismic
-      match: '/article/:uid', // pages will be generated under this pattern (optional)
-      path: '/article', // placeholder page for unpublished documents
+      match: '/article/:uid', // pages will be generated under this pattern
+      previewPath: '/article', // optional path for unpublished documents
       component: require.resolve('./src/templates/article.js'),
       sortBy: 'date_ASC', // optional, default: meta_lastPublicationDate_ASC; useful for pagination
     }],

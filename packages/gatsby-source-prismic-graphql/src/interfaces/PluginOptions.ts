@@ -1,7 +1,7 @@
 export interface Page {
   type: string;
   match: string;
-  path: string;
+  previewPath?: string;
   component: string;
   langs?: string[];
   sortBy?: string;

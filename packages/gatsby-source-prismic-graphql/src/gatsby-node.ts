@@ -1,7 +1,7 @@
 import path from 'path';
 import { getRootQuery } from 'gatsby-source-graphql-universal/getRootQuery';
 import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
-import { fieldName, PrismicLink, typeName } from './utils';
+import { fieldName, PrismicLink, typeName, getPagePreviewPath } from './utils';
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
 
@@ -55,17 +55,16 @@ function createGeneralPreviewPage(createPage: Function, options: PluginOptions):
   });
 }
 
-function createDocumentPreviewPage(createPage: Function, page: Page, lang?: string): void {
+function createDocumentPreviewPage(createPage: Function, options: PluginOptions, page: Page): void {
   const rootQuery = getRootQuery(page.component);
   createPage({
-    path: page.path,
-    matchPath: process.env.NODE_ENV === 'production' ? undefined : page.match,
+    path: getPagePreviewPath(page),
     component: page.component,
     context: {
       rootQuery,
       id: '',
       uid: '',
-      lang: lang,
+      lang: options.defaultLang,
       paginationPreviousUid: '',
       paginationPreviousLang: '',
       paginationNextUid: '',
@@ -92,10 +91,10 @@ function createDocumentPath(
   { defaultLang, shortenUrlLangs }: PluginOptions
 ): string {
   const pathKeys: any[] = [];
-  const pathTemplate: string = pageOptions.match || pageOptions.path;
+  const pathTemplate: string = pageOptions.match;
   pathToRegexp(pathTemplate, pathKeys);
   const langKey = pathKeys.find(key => key.name === 'lang');
-  const isLangOptional: boolean = !!(langKey && langKey.optional);
+  const isLangOptional: boolean = !!(langKey && langKey.modifier === '?');
   const toPath: Function = compilePath(pathTemplate);
 
   const documentLang: string = node._meta.lang;
@@ -228,6 +227,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       const newEndCursor: string = response.pageInfo.endCursor;
       await createPagesForType(page, lang, newEndCursor, documents);
     } else {
+      createDocumentPreviewPage(createPage, options, page);
       createDocumentPages(createPage, documents, options, page);
     }
   }
@@ -237,17 +237,14 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   const pageCreators: Promise<any>[] = [];
 
   // Create pageCreator promises for each page/language combination
-  pages.forEach(
-    (page: Page): void => {
-      const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
-      if (langs) {
-        langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
-      } else {
-        pageCreators.push(createPagesForType(page));
-      }
-      createDocumentPreviewPage(createPage, page, options.defaultLang);
+  pages.forEach((page: Page): void => {
+    const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
+    if (langs) {
+      langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
+    } else {
+      pageCreators.push(createPagesForType(page));
     }
-  );
+  });
 
   // Run all pageCreators simultaneously
   await Promise.all(pageCreators);

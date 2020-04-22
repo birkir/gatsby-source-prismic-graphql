@@ -3,6 +3,7 @@ import { HttpLink } from 'apollo-link-http';
 import { HttpOptions } from 'apollo-link-http-common';
 import Prismic from 'prismic-javascript';
 import { parseQueryString } from './parseQueryString';
+import { Page } from '../interfaces/PluginOptions';
 
 interface IPrismicLinkArgs extends HttpOptions {
   uri: string;
@@ -21,6 +22,10 @@ export let linkResolver: (doc: any) => string = () => '/';
 
 export function registerLinkResolver(link: typeof linkResolver) {
   linkResolver = link;
+}
+
+export function getPagePreviewPath(page: Page) {
+  return page.previewPath || '/preview/' + page.type.toLowerCase();
 }
 
 export function getCookies() {
