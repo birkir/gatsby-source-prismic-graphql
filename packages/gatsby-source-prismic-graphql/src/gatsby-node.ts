@@ -75,12 +75,11 @@ function createDocumentPreviewPage(createPage: Function, options: PluginOptions,
 
 /**
  * Create URL paths interpolating `:uid` and `:lang` or `:lang?` with actual values.
- * @param pageOptions - Returned paths are based on the `match` or `path` (if `match`
- * is not present) properties of the `pageOptions` object.
+ * @param pageOptions - Returned paths are based on the `match` property of the `pageOptions` object.
  * @param node - Document node metadata provide the `lang` and `uid` values for the returned path.
  * @param options - The plugin's global options.
  * @param options.defaultLang - `defaultLang` as declared in `PluginOptions`. If `lang` segment is
- * marked optional (`:lang?`) in the page `match` or `path` values and `defaultLang` matches the
+ * marked optional (`:lang?`) in the page `match` and `defaultLang` matches the
  * document's actual language, the language segment of the path will be omitted in the returned path.
  * @param options.shortenUrlLangs - When truthy, the lang used for the path will be limited to 2 characters.
  * @return The path for the document's URL with `lang` and `uid` interpolated as necessary.
