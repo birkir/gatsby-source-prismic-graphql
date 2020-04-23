@@ -237,16 +237,14 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   const pageCreators: Promise<any>[] = [];
 
   // Create pageCreator promises for each page/language combination
-  pages.forEach(
-    (page: Page): void => {
-      const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
-      if (langs) {
-        langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
-      } else {
-        pageCreators.push(createPagesForType(page));
-      }
+  pages.forEach((page: Page): void => {
+    const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
+    if (langs) {
+      langs.forEach((lang: string) => pageCreators.push(createPagesForType(page, lang)));
+    } else {
+      pageCreators.push(createPagesForType(page));
     }
-  );
+  });
 
   // Run all pageCreators simultaneously
   await Promise.all(pageCreators);
@@ -283,9 +281,10 @@ exports.createResolvers = (
           resolve(source: any, args: any) {
             const obj = (source && source[fieldName]) || {};
             const url = args.crop ? obj[args.crop] && obj[args.crop].url : obj.url;
+
             if (url) {
               return createRemoteFileNode({
-                url: querystring.unescape(url),
+                url: querystring.unescape(url).replace(/\?.*$/g, ''),
                 store,
                 cache,
                 createNode,
