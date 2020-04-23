@@ -98,7 +98,9 @@ export default class PreviewPage extends React.Component<any> {
       })
       .find((n: any) => !!n);
 
-    if (pathWithQS) {
+    const pageExists = this.props.pageContext.prismicAllPagePaths.indexOf(link) !== -1;
+
+    if (!pageExists && pathWithQS) {
       const newUrl = `${window.location.protocol}//${window.location.host}${pathWithQS}`;
       window.location.replace(newUrl);
     } else {

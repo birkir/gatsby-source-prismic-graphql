@@ -20,6 +20,10 @@ export const typeName = 'PRISMIC';
 // keep link resolver function
 export let linkResolver: (doc: any) => string = () => '/';
 
+export function flatten<T>(arr: T[][]): T[] {
+  return arr.reduce((a: T[], b: T[]) => a.concat(b), []);
+}
+
 export function registerLinkResolver(link: typeof linkResolver) {
   linkResolver = link;
 }
