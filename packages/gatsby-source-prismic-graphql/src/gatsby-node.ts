@@ -120,7 +120,7 @@ function createDocumentPath(
 
 function createDocumentPages(
   createPage: Function,
-  edges: readonly Edge[],
+  edges: Edge[],
   options: PluginOptions,
   page: Page
 ): string[] {
@@ -211,8 +211,8 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     page: Page,
     lang?: string,
     endCursor: string = '',
-    documents: readonly Edge[] = []
-  ): Promise<readonly Edge[]> {
+    documents: Edge[] = []
+  ): Promise<Edge[]> {
     // Prepare and execute query
     const documentType: string = `all${page.type}s`;
     const sortType: string = `PRISMIC_Sort${page.type}y`;
@@ -252,7 +252,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
   }
 
   // Create pageCreator promises for each page/language combination
-  const pages: readonly Page[] = options.pages || [];
+  const pages: Page[] = options.pages || [];
   const pageCreators = flatten(
     pages.map((page: Page) => {
       const langs = page.langs || options.langs || (options.defaultLang && [options.defaultLang]);
