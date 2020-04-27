@@ -1,8 +1,9 @@
 import React from 'react';
 import Prismic from 'prismic-javascript';
-import { linkResolver, getCookies } from '../utils';
+import { pathToRegexp, Key } from 'path-to-regexp';
+import { linkResolver, getCookies, getPagePreviewPath } from '../utils';
 import { parseQueryString } from '../utils/parseQueryString';
-import pathToRegexp from 'path-to-regexp';
+import { Page } from '../interfaces/PluginOptions';
 
 interface Variation {
   id: string;
@@ -78,33 +79,32 @@ export default class PreviewPage extends React.Component<any> {
       return;
     }
 
-    const link = linkResolver(doc);
+    const link: string = linkResolver(doc);
 
-    const urlWithQueryString = (this.config.pages || [])
-      .map((page: any) => {
-        const keys: any = [];
-        const re = pathToRegexp(page.match, keys);
+    const pathWithQS = (this.config.pages || [])
+      .map((page: Page) => {
+        const keys: Key[] = [];
+        const re: RegExp = pathToRegexp(page.match, keys);
         const match = re.exec(link);
         const delimiter = (str: string) => (str.indexOf('?') === -1 ? '?' : '&');
         if (match) {
-          return match
-            .slice(1)
-            .reduce(
-              (acc, value, i) =>
-                acc + (keys[i] ? `${delimiter(acc)}${keys[i].name}=${value}` : value),
-              page.path
-            );
+          return match.slice(1).reduce((acc: string, value: string, i: number) => {
+            if (keys[i] && value !== undefined)
+              return acc + `${delimiter(acc)}${keys[i].name}=${value}`;
+            else return acc;
+          }, getPagePreviewPath(page));
         }
         return null;
       })
       .find((n: any) => !!n);
 
-    const exists = (await fetch(link).then(res => res.status)) === 200;
+    const pageExists = this.props.pageContext.prismicAllPagePaths.indexOf(link) !== -1;
 
-    if (!exists && urlWithQueryString) {
-      window.location = urlWithQueryString;
+    if (!pageExists && pathWithQS) {
+      const newUrl = `${window.location.protocol}//${window.location.host}${pathWithQS}`;
+      window.location.replace(newUrl);
     } else {
-      window.location = link as any;
+      window.location.replace(link as any);
     }
   };
 
