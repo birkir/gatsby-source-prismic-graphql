@@ -1,7 +1,7 @@
 {
   "name": "@examples/pagination",
   "private": true,
-  "version": "3.4.0",
+  "version": "3.6.0",
   "description": "A simple starter to get up and developing quickly with Gatsby",
   "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "dependencies": {
@@ -14,7 +14,7 @@
     "gatsby-plugin-react-helmet": "^3.0.10",
     "gatsby-plugin-sharp": "^2.2.9",
     "gatsby-source-filesystem": "^2.0.27",
-    "gatsby-source-prismic-graphql": "^3.4.0",
+    "gatsby-source-prismic-graphql": "^3.6.0",
     "gatsby-transformer-sharp": "^2.2.5",
     "prismic-reactjs": "^0.3.2",
     "prop-types": "^15.7.2",
