@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.6.1](https://github.com/birkir/gatsby-source-prismic-graphql/compare/v3.6.0...v3.6.1) (2020-04-28)
+
+### Features
+
+- attp 2 ([4f42ec9](https://github.com/birkir/gatsby-source-prismic-graphql/commit/4f42ec991cfb3fc5c8e172b2ad2f64786433d1fc))
+- attp 3 ([9bb118f](https://github.com/birkir/gatsby-source-prismic-graphql/commit/9bb118f9a84eb8f40b12a5a12619f8382c870884))
+- no canary on releases ([5a64d7a](https://github.com/birkir/gatsby-source-prismic-graphql/commit/5a64d7a1f521096a027d445b3c1cc9af68ba6966))
+
 # [3.6.0](https://github.com/birkir/gatsby-source-prismic-graphql/compare/v3.4.0...v3.6.0) (2020-04-28)
 
 ### Bug Fixes
