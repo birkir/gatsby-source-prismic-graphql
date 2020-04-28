@@ -14,7 +14,7 @@
     "clean": "lerna run clean",
     "start": "lerna run start --ignore \"@examples/*\" --stream",
     "build": "lerna run build --ignore \"@examples/*\"",
-    "release": "lerna version",
+    "release": "lerna version --force-publish",
     "prettier": "prettier --write '**/*.{json,md,js,jsx,ts,tsx}'",
     "test": "lerna run build --scope \"@examples/*\"",
     "test:prettier": "prettier --list-different '**/*.{json,md,js,jsx,ts,tsx}'"
