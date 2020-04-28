@@ -4,9 +4,7 @@ import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-univer
 import { flatten, fieldName, PrismicLink, typeName, getPagePreviewPath } from './utils';
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
-
 import { pathToRegexp, compile as compilePath, Key } from 'path-to-regexp';
-import querystring from 'querystring';
 
 interface Edge {
   cursor: string;
@@ -303,7 +301,7 @@ exports.createResolvers = (
             const url = args.crop ? obj[args.crop] && obj[args.crop].url : obj.url;
             if (url) {
               return createRemoteFileNode({
-                url: querystring.unescape(url),
+                url,
                 store,
                 cache,
                 createNode,
