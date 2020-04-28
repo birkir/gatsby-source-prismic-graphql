@@ -16,7 +16,7 @@
     "build": "lerna run build --ignore \"@examples/*\"",
     "release": "lerna version",
     "prettier": "prettier --write '**/*.{json,md,js,jsx,ts,tsx}'",
-    "test": "lerna run build --scope \"@examples/*\" --parallel",
+    "test": "lerna run build --scope \"@examples/*\"",
     "test:prettier": "prettier --list-different '**/*.{json,md,js,jsx,ts,tsx}'"
   },
   "husky": {
