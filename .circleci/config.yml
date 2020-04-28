@@ -70,6 +70,7 @@ workflows:
               only: master
   deploy_release:
     jobs:
+      - test
       - release:
           filters:
             branches:
