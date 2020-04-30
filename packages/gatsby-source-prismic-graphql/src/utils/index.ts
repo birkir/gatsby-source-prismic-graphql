@@ -5,6 +5,7 @@ import Prismic from 'prismic-javascript';
 import { Endpoints } from './prismic';
 import { parseQueryString } from './parseQueryString';
 import { ApolloLink } from 'apollo-link';
+import { Page } from '../interfaces/PluginOptions';
 
 interface IPrismicLinkArgs extends HttpOptions {
   uri: string;
@@ -21,8 +22,16 @@ export const typeName = 'PRISMIC';
 // keep link resolver function
 export let linkResolver: (doc: any) => string = () => '/';
 
+export function flatten<T>(arr: T[][]): T[] {
+  return arr.reduce((a: T[], b: T[]) => a.concat(b), []);
+}
+
 export function registerLinkResolver(link: typeof linkResolver) {
   linkResolver = link;
+}
+
+export function getPagePreviewPath(page: Page) {
+  return page.previewPath || '/preview/' + page.type.toLowerCase();
 }
 
 export function getCookies(): Map<string, string> {
@@ -46,6 +55,13 @@ export function fetchStripQueryWhitespace(url: string, ...args: any) {
       String(queryString.get('query'))
         .replace(/\#.*\n/g, '')
         .replace(/\s+/g, ' ')
+        .replace(/\s?\{\s?/g, '{')
+        .replace(/\s?\}\s?/g, '}')
+        .replace(/\s?\:\s?/g, ':')
+        .replace(/\s?\(\s?/g, '(')
+        .replace(/\s?\)\s?/g, ')')
+        .replace(/\.\.\.\s/g, '...')
+        .replace(/\,\s/g, ',')
     );
   }
   const updatedQs = Array.from(queryString)

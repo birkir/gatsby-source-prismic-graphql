@@ -1,7 +1,7 @@
 import { Link, graphql } from 'gatsby';
 import React from 'react';
 import Layout from '../components/layout';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { RichText } from 'prismic-reactjs';
 
 export const query = graphql`

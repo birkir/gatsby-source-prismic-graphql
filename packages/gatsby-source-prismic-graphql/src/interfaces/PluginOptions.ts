@@ -1,7 +1,7 @@
 export interface Page {
   type: string;
   match: string;
-  path: string;
+  previewPath?: string;
   component: string;
   langs?: string[];
   sortBy?: string;
@@ -22,4 +22,5 @@ export interface PluginOptions {
   pages?: Page[];
   omitPrismicScript?: boolean;
   sharpKeys: RegExp[] | string[];
+  extraPageFields: string;
 }
