@@ -2,7 +2,9 @@ import { setContext } from 'apollo-link-context';
 import { HttpLink } from 'apollo-link-http';
 import { HttpOptions } from 'apollo-link-http-common';
 import Prismic from 'prismic-javascript';
+import { Endpoints } from './prismic';
 import { parseQueryString } from './parseQueryString';
+import { ApolloLink } from 'apollo-link';
 import { Page } from '../interfaces/PluginOptions';
 
 interface IPrismicLinkArgs extends HttpOptions {
@@ -32,7 +34,7 @@ export function getPagePreviewPath(page: Page) {
   return page.previewPath || '/preview/' + page.type.toLowerCase();
 }
 
-export function getCookies() {
+export function getCookies(): Map<string, string> {
   return parseQueryString(document.cookie, ';');
 }
 
@@ -76,9 +78,8 @@ export function fetchStripQueryWhitespace(url: string, ...args: any) {
  */
 export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLinkArgs) {
   const BaseURIReg = /^(https?:\/\/.+?\..+?\..+?)\/graphql\/?$/;
-  const matches = uri.match(BaseURIReg);
-  if (matches && matches[1]) {
-    const prismicClient = Prismic.client(`${matches[1]}/api`, { accessToken });
+  if (BaseURIReg.test(uri)) {
+    const prismicClient = Prismic.client(Endpoints.v2(uri), { accessToken });
     const prismicLink = setContext(
       async (request, options: { headers: { [key: string]: string } }) => {
         let prismicRef;
@@ -86,7 +87,7 @@ export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLi
           const cookies = getCookies();
           if (cookies.has(Prismic.experimentCookie)) {
             prismicRef = cookies.get(Prismic.experimentCookie);
-          } else if (cookies.has(Prismic.previewCookie)) {
+          } else {
             prismicRef = cookies.get(Prismic.previewCookie);
           }
         }
@@ -110,6 +111,21 @@ export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLi
       }
     );
 
+    const editButtonLink = new ApolloLink((operation, forward) => {
+      operation.setContext(({ headers }: { headers: Record<string, string> }) => {
+        const mainContext = operation.getContext().graphqlContext || {};
+        const pageContext = mainContext.context || {};
+        const pageHeaders = pageContext.headers;
+        return {
+          headers: {
+            ...headers,
+            ...pageHeaders,
+          },
+        };
+      });
+      return (forward && forward(operation)) || null;
+    });
+
     const httpLink = new HttpLink({
       uri,
       useGETForQueries: true,
@@ -117,7 +133,7 @@ export function PrismicLink({ uri, accessToken, customRef, ...rest }: IPrismicLi
       fetch: fetchStripQueryWhitespace,
     });
 
-    return prismicLink.concat(httpLink);
+    return ApolloLink.from([prismicLink, editButtonLink, httpLink]);
   } else {
     throw new Error(`${uri} isn't a valid Prismic GraphQL endpoint`);
   }

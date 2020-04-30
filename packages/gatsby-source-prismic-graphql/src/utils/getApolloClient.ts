@@ -2,6 +2,7 @@ import { ApolloClient } from 'apollo-boost';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import { getIntrospectionQueryResultData } from './getIntrospectionQueryResultData';
 import { PrismicLink } from './index';
+import { Endpoints } from './prismic';
 
 let client: ApolloClient<any> | undefined = undefined;
 
@@ -17,7 +18,7 @@ export const getApolloClient = async ({ repositoryName }: any): Promise<ApolloCl
     client = new ApolloClient({
       cache: new InMemoryCache({ fragmentMatcher }),
       link: PrismicLink({
-        uri: `https://${repositoryName}.prismic.io/graphql`,
+        uri: Endpoints.graphql(repositoryName),
         credentials: 'same-origin',
       }),
     });
