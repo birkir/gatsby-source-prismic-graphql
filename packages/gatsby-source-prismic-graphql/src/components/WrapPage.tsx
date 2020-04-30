@@ -135,7 +135,7 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
     return getApolloClient(this.props.options).then(client => {
       return client.query({
         query: stripSharp(getIsolatedQuery(query, fieldName, typeName)),
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'no-cache',
         variables,
         ...rest,
       });
