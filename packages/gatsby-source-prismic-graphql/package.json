@@ -34,7 +34,7 @@
     "gatsby-image": "^2.2.4",
     "gatsby-source-filesystem": "^2.1.2",
     "gatsby-source-graphql": "^2.1.32",
-    "gatsby-source-graphql-universal": "^3.1.6",
+    "gatsby-source-graphql-universal": "^3.2.0",
     "path-to-regexp": "^6.0.0",
     "prismic-javascript": "^2.1.1",
     "traverse": "^0.6.6",
