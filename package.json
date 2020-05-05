@@ -14,8 +14,9 @@
     "clean": "lerna run clean",
     "start": "lerna run start --ignore \"@examples/*\" --stream",
     "build": "lerna run build --ignore \"@examples/*\"",
+    "release": "lerna version --force-publish",
     "prettier": "prettier --write '**/*.{json,md,js,jsx,ts,tsx}'",
-    "test": "lerna run build --scope \"@examples/*\" --parallel",
+    "test": "lerna run build --scope \"@examples/*\"",
     "test:prettier": "prettier --list-different '**/*.{json,md,js,jsx,ts,tsx}'"
   },
   "husky": {
@@ -56,5 +57,6 @@
     "gatsby": "^2.13.37",
     "react": "^16.8.4",
     "react-dom": "^16.8.4"
-  }
+  },
+  "version": "3.4.0"
 }
