@@ -299,9 +299,10 @@ exports.createResolvers = (
           resolve(source: any, args: any) {
             const obj = (source && source[fieldName]) || {};
             const url = args.crop ? obj[args.crop] && obj[args.crop].url : obj.url;
+
             if (url) {
               return createRemoteFileNode({
-                url,
+                url: querystring.unescape(url).replace(/\?.*$/g, ''),
                 store,
                 cache,
                 createNode,
