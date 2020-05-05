@@ -28,9 +28,10 @@ const stripSharp = (query: any) => {
       x.kind == 'Name' &&
       this.parent &&
       this.parent.node.kind === 'Field' &&
-      x.value.match(/Sharp$/)
+      x.value.match(/Sharp$/) &&
+      !x.value.match(/.+childImageSharp$/)
     ) {
-      this.parent.delete();
+      this.parent.remove();
     }
   });
 };
