@@ -27,7 +27,7 @@ export const query = graphql`
   }
 `;
 
-const Home = props => {
+const Home = (props) => {
   const limit = 2;
   const didMountRef = useRef(false);
   const [page, setPage] = React.useState(-1);
@@ -48,7 +48,7 @@ const Home = props => {
 
     props.prismic
       .load({ variables: { after: getCursorFromDocumentIndex(page) } })
-      .then(res => setData(res.data));
+      .then((res) => setData(res.data));
   }, [page]);
 
   return (

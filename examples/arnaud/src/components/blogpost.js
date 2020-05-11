@@ -23,7 +23,7 @@ export const query = graphql`
   }
 `;
 
-const BlogPost = props => {
+const BlogPost = (props) => {
   const edges = get(props.data, 'prismic.allBlogposs.edges', []);
   const data = get(edges, '0.node');
 

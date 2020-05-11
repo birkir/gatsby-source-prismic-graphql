@@ -39,7 +39,7 @@ const query = graphql`
   }
 `;
 
-const renderArticles = data => {
+const renderArticles = (data) => {
   return (
     <>
       <h1>List of articles</h1>
