@@ -5,6 +5,7 @@ import { flatten, fieldName, PrismicLink, typeName, getPagePreviewPath } from '.
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
 import { pathToRegexp, compile as compilePath, Key } from 'path-to-regexp';
+import querystring from 'querystring';
 
 interface Edge {
   cursor: string;
