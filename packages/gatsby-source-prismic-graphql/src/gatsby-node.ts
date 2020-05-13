@@ -6,6 +6,7 @@ import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
 import { pathToRegexp, compile as compilePath, Key } from 'path-to-regexp';
 import { defaultPluginOptions } from './utils/defaultPluginOptions';
+import querystring from 'querystring';
 
 interface Edge {
   cursor: string;
