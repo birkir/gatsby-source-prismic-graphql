@@ -8,7 +8,6 @@ export function parseQueryString(qs: string, delimiter: string = '&'): Map<strin
     })
   );
 }
-
 export function parseQueryStringAsJson(
   qs: string = '',
   delimiter: string = '&'
