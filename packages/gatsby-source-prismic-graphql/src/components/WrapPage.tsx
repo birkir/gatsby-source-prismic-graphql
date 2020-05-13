@@ -1,14 +1,16 @@
 import { getIsolatedQuery } from 'gatsby-source-graphql-universal';
+
 import pick from 'lodash/pick';
 import get from 'lodash/get';
-import pathToRegexp from 'path-to-regexp';
+import { pathToRegexp, match as matchRegex, Key } from 'path-to-regexp';
+
 import Prismic from 'prismic-javascript';
 import React from 'react';
 import traverse from 'traverse';
 import { getCookies } from '../utils';
 import { createLoadingScreen } from '../utils/createLoadingScreen';
 import { getApolloClient } from '../utils/getApolloClient';
-import { parseQueryString } from '../utils/parseQueryString';
+import { parseQueryString, parseQueryStringAsJson } from '../utils/parseQueryString';
 import { PluginOptions } from '../interfaces/PluginOptions';
 import { defaultPluginOptions } from '../utils/defaultPluginOptions';
 
@@ -28,9 +30,10 @@ const stripSharp = (query: any) => {
       x.kind == 'Name' &&
       this.parent &&
       this.parent.node.kind === 'Field' &&
-      x.value.match(/Sharp$/)
+      x.value.match(/Sharp$/) &&
+      !x.value.match(/.+childImageSharp$/)
     ) {
-      this.parent.delete();
+      this.parent.remove();
     }
   });
 };
@@ -61,25 +64,25 @@ export class WrapPage extends React.PureComponent<WrapPageProps, WrapPageState> 
   get params() {
     const params: any = { ...this.props.pageContext };
 
-    const keys: any = [];
+    const keys: Key[] = [];
     const re = pathToRegexp(get(this.props.pageContext, 'matchPath', ''), keys);
     const match = re.exec(get(this.props, 'location.pathname', ''));
-    if (match) {
-      keys.forEach((value: any, index: number) => {
-        if (!params[value.name]) {
-          params[value.name] = match[index + 1];
-        }
-      });
-    }
 
-    const qs = parseQueryString(String(get(this.props, 'location.search', '?')).substr(1));
-    this.keys.forEach((key: string) => {
-      if (!params[key] && qs.has(key)) {
-        params[key] = qs.get(key);
-      }
+    const matchFn = matchRegex(get(this.props.pageContext, 'matchPath', ''), {
+      decode: decodeURIComponent,
     });
 
-    return params;
+    const pathParams = (() => {
+      const res = matchFn(get(this.props, 'location.pathname', ''));
+      return res ? res.params : {};
+    })();
+
+    const qsParams = (() => {
+      const qsValue = String(get(this.props, 'location.search', '?')).substr(1);
+      return parseQueryStringAsJson(qsValue);
+    })();
+
+    return Object.assign(params, qsParams, pathParams);
   }
 
   getQuery() {
@@ -148,7 +151,7 @@ export class WrapPage extends React.PureComponent<WrapPageProps, WrapPageState> 
     return getApolloClient(this.props.options).then(client => {
       return client.query({
         query: stripSharp(getIsolatedQuery(query, fieldName, typeName)),
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'no-cache',
         variables,
         ...rest,
       });

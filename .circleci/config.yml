@@ -39,6 +39,17 @@ jobs:
       - run:
           name: Publish package
           command: yarn run lerna publish --canary --force-publish --yes
+  release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+      - run:
+          name: Publish package
+          command: yarn run lerna publish from-git --force-publish --yes
 
 workflows:
   version: 2
@@ -57,3 +68,16 @@ workflows:
           filters:
             branches:
               only: master
+            tags:
+              ignore: /^v[0-9]+(\.[0-9]+)*$/
+  deploy_release:
+    jobs:
+      - test
+      - release:
+          requires:
+            - test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
