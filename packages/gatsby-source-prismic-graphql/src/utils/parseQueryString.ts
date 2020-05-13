@@ -2,8 +2,8 @@ export function parseQueryString(qs: string, delimiter: string = '&'): Map<strin
   if (!qs || qs.length == 0) return new Map();
 
   return new Map(
-    qs.split(delimiter).map((item) => {
-      const [key, ...value] = item.split('=').map((part) => decodeURIComponent(part.trim()));
+    qs.split(delimiter).map(item => {
+      const [key, ...value] = item.split('=').map(part => decodeURIComponent(part.trim()));
       return [key, value.join('=')] as [string, string];
     })
   );

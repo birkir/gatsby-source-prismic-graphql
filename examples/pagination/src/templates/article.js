@@ -103,7 +103,7 @@ const EnhancedPagination = ({ nextArticle, prevArticle }) => (
   </div>
 );
 
-const Article = (props) => {
+const Article = props => {
   const {
     pageContext: { paginationPreviousMeta, paginationNextMeta },
     data: {

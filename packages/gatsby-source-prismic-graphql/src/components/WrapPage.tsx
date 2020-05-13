@@ -22,7 +22,7 @@ const queryOrSource = (obj: any) => {
 };
 
 const stripSharp = (query: any) => {
-  return traverse(query).map(function (x) {
+  return traverse(query).map(function(x) {
     if (
       typeof x === 'object' &&
       x.kind == 'Name' &&
@@ -103,7 +103,7 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
       const closeLoading = createLoadingScreen();
       this.setState({ loading: true });
       this.load()
-        .then((res) => {
+        .then(res => {
           this.setState({
             loading: false,
             error: null,
@@ -111,7 +111,7 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
           });
           closeLoading();
         })
-        .catch((error) => {
+        .catch(error => {
           this.setState({ loading: false, error });
           console.error(error);
           closeLoading();
@@ -133,7 +133,7 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
     const keys = [...(this.props.options.passContextKeys || []), ...this.keys];
     variables = { ...pick(this.params, keys), ...variables };
 
-    return getApolloClient(this.props.options).then((client) => {
+    return getApolloClient(this.props.options).then(client => {
       return client.query({
         query: stripSharp(getIsolatedQuery(query, fieldName, typeName)),
         fetchPolicy: 'no-cache',

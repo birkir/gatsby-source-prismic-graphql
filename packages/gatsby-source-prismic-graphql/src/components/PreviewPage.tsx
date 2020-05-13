@@ -49,13 +49,13 @@ export default class PreviewPage extends React.Component<any> {
 
       if (api.experiments.running && api.experiments.running.length) {
         runningVariations.concat(
-          ...api.experiments.running.map((experiment) => experiment.data.variations)
+          ...api.experiments.running.map(experiment => experiment.data.variations)
         );
       }
 
       if (experiment && runningVariations.length) {
         const matchedVariation = runningVariations.find(
-          (variation) => variation.label.toLowerCase().replace(' ', '-') === experiment
+          variation => variation.label.toLowerCase().replace(' ', '-') === experiment
         );
 
         if (matchedVariation) {

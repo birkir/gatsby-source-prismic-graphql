@@ -63,7 +63,7 @@ export function fetchStripQueryWhitespace(url: string, ...args: any) {
     );
   }
   const updatedQs = Array.from(queryString)
-    .map((n) => n.map((j) => encodeURIComponent(j)).join('='))
+    .map(n => n.map(j => encodeURIComponent(j)).join('='))
     .join('&');
   const updatedUrl = `${hostname}?${updatedQs}`;
 

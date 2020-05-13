@@ -102,7 +102,7 @@ function createDocumentPath(
   const pathKeys: Key[] = [];
   const pathTemplate: string = pageOptions.match;
   pathToRegexp(pathTemplate, pathKeys);
-  const langKey = pathKeys.find((key) => key.name === 'lang');
+  const langKey = pathKeys.find(key => key.name === 'lang');
   const isLangOptional: boolean = !!(langKey && langKey.modifier === '?');
   const toPath: Function = compilePath(pathTemplate);
 

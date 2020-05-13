@@ -16,7 +16,7 @@ export const query = graphql`
   }
 `;
 
-const Homepage = (props) => {
+const Homepage = props => {
   const data = props.data.prismic.allHomepages.edges[0].node;
 
   return (
