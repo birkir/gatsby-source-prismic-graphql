@@ -31,7 +31,7 @@ const stripSharp = (query: any) => {
       x.value.match(/Sharp$/) &&
       !x.value.match(/.+childImageSharp$/)
     ) {
-      this.parent.remove();
+      this.parent.delete();
     }
   });
 };
