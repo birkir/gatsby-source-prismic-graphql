@@ -144,9 +144,15 @@ export class WrapPage extends React.PureComponent<any, WrapPageState> {
   };
 
   render() {
-    const children = this.props.children as any;
+    const props = this.props as { children: any, options: any, [key: string]: any}
+
+    // we need to pass the parent props to the child
+    // but we don't want to pass the prismic options or the children props
+    // so exclude those and take everything else
+    const { children, options, ...elProps } = props
 
     return React.cloneElement(children, {
+      ...elProps,
       ...children.props,
       prismic: {
         options: this.props.options,
