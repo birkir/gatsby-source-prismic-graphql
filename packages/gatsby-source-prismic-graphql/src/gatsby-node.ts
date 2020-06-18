@@ -219,13 +219,17 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     endCursor: string = '',
     documents: Edge[] = []
   ): Promise<Edge[]> {
-    // Prepare and execute query
     const {
       typeName = defaultPluginOptions.typeName,
       fieldName = defaultPluginOptions.fieldName,
     } = options;
-    const documentType: string = `all${page.type}s`;
-    const sortType: string = `${typeName}_Sort${page.type}y`;
+    // Format page.type so that the graphql query doesn't complain.
+    const pageTypeUnderscored = typeName.toLowerCase().split(' ').join('_');
+    const pageTypeFormatted = pageTypeUnderscored.charAt(0).toUpperCase() + pageTypeUnderscored.slice(1);
+    // Prepare and execute query
+    const documentType: string = `all${pageTypeFormatted}s`;
+    const sortType: string = `PRISMIC_Sort${pageTypeFormatted}y`;
+
     const extraPageFields = options.extraPageFields || '';
     const query: string = getDocumentsQuery({ documentType, sortType, extraPageFields, fieldName });
     const { data, errors } = await graphql(query, {

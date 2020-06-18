@@ -56,7 +56,7 @@ yarn add gatsby-source-prismic-graphql
     accessToken: '...', // optional
     prismicRef: '...', // optional, default: master; useful for A/B experiments
     path: '/preview', // optional, default: /preview
-    previews: true, // optional, default: false
+    previews: true, // optional, default: true
     pages: [{ // optional
       type: 'Article', // TypeName from prismic
       match: '/article/:uid', // pages will be generated under this pattern
@@ -97,7 +97,7 @@ Let's assume we have the following page configuration set:
   pages: [{
     type: 'Article',
     match: '/blogpost/:uid',
-    path: '/blogpost',
+    previewPath: '/blogpost',
     component: require.resolve('./src/templates/article.js'),
   }],
 }
@@ -126,13 +126,13 @@ For example, if you had a single Prismic _Article_ type and wanted pages with `m
     type: 'Article',
     match: '/musicblog/:uid',
     filter: data => data.node._meta.uid.includes('music'),
-    path: '/blogposts',
+    previewPath: '/blogposts',
     component: require.resolve('./src/templates/article.js'),
   }, {
     type: 'Article',
     match: '/blog/:uid',
     filter: data => !data.node._meta.uid.includes('music'),
-    path: '/blogposts',
+    previewPath: '/blogposts',
     component: require.resolve('./src/templates/article.js'),
   }],
 }
@@ -155,13 +155,13 @@ Sometimes the meta provided by default doesn't contain enough context to be able
     type: 'Article',
     match: '/techno/:uid',
     filter: data => data.node.music_genre === 'techno',
-    path: '/blogposts',
+    previewPath: '/blogposts',
     component: require.resolve('./src/templates/article.js'),
   }, {
     type: 'Article',
     match: '/acoustic/:uid',
     filter: data => data.node.music_genre === 'acoustic',
-    path: '/blogposts',
+    previewPath: '/blogposts',
     component: require.resolve('./src/templates/article.js'),
   }]
 }
@@ -188,14 +188,14 @@ Prismic allows you to create your content in multiple languages. This library su
     pages: [{
       type: 'Article',
       match: '/:lang?/:uid',
-      path: '/article',
+      previewPath: '/article',
       component: require.resolve('./src/templates/article.js'),
       sortBy: 'date_ASC',
       langs: ['en-us', 'es-es', 'is'],
     }, {
       type: "Noticias",
       match: '/noticias/:uid',
-      path: '/noticias',
+      previewPath: '/noticias',
       component: require.resolve('./src/templates/noticias.js'),
       sortBy: 'date_ASC',
       langs: ['es-es'],
