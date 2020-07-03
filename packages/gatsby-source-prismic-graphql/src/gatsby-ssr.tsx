@@ -26,6 +26,7 @@ exports.onRenderBody = ({ setHeadComponents }: OnRenderBodyArgs, options: Plugin
         key="prismic-script"
         type="text/javascript"
         src="//static.cdn.prismic.io/prismic.min.js"
+        defer
       />
     );
   }
