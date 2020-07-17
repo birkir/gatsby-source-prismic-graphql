@@ -23,4 +23,6 @@ export interface PluginOptions {
   omitPrismicScript?: boolean;
   sharpKeys: RegExp[] | string[];
   extraPageFields: string;
+  fieldName?: string;
+  typeName?: string;
 }

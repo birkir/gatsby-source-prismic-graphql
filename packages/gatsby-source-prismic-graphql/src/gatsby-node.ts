@@ -1,10 +1,11 @@
 import path from 'path';
 import { getRootQuery } from 'gatsby-source-graphql-universal/getRootQuery';
 import { onCreateWebpackConfig, sourceNodes } from 'gatsby-source-graphql-universal/gatsby-node';
-import { flatten, fieldName, PrismicLink, typeName, getPagePreviewPath } from './utils';
+import { flatten, PrismicLink, getPagePreviewPath } from './utils';
 import { Page, PluginOptions } from './interfaces/PluginOptions';
 import { createRemoteFileNode } from 'gatsby-source-filesystem';
 import { pathToRegexp, compile as compilePath, Key } from 'path-to-regexp';
+import { defaultPluginOptions } from './utils/defaultPluginOptions';
 import querystring from 'querystring';
 
 interface Edge {
@@ -33,6 +34,10 @@ exports.onCreatePage = ({ page, actions }: any) => {
 };
 
 exports.sourceNodes = (ref: any, options: PluginOptions) => {
+  const {
+    fieldName = defaultPluginOptions.fieldName,
+    typeName = defaultPluginOptions.typeName,
+  } = options;
   const opts = {
     fieldName,
     typeName,
@@ -159,13 +164,15 @@ const getDocumentsQuery = ({
   documentType,
   sortType,
   extraPageFields,
+  fieldName,
 }: {
   documentType: string;
   sortType: string;
   extraPageFields: string;
+  fieldName: string;
 }): string => `
   query AllPagesQuery ($after: String, $lang: String, $sortBy: ${sortType}) {
-    prismic {
+    ${fieldName} {
       ${documentType} (
         first: 20
         after: $after
@@ -212,14 +219,19 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     endCursor: string = '',
     documents: Edge[] = []
   ): Promise<Edge[]> {
+    const {
+      typeName = defaultPluginOptions.typeName,
+      fieldName = defaultPluginOptions.fieldName,
+    } = options;
     // Format page.type so that the graphql query doesn't complain.
-    const pageTypeUnderscored = page.type.toLowerCase().split(' ').join('_');
+    const pageTypeUnderscored = typeName.toLowerCase().split(' ').join('_');
     const pageTypeFormatted = pageTypeUnderscored.charAt(0).toUpperCase() + pageTypeUnderscored.slice(1);
     // Prepare and execute query
     const documentType: string = `all${pageTypeFormatted}s`;
     const sortType: string = `PRISMIC_Sort${pageTypeFormatted}y`;
+
     const extraPageFields = options.extraPageFields || '';
-    const query: string = getDocumentsQuery({ documentType, sortType, extraPageFields });
+    const query: string = getDocumentsQuery({ documentType, sortType, extraPageFields, fieldName });
     const { data, errors } = await graphql(query, {
       after: endCursor,
       lang: lang || null,
@@ -230,7 +242,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
       throw errors[0];
     }
 
-    const response = data.prismic[documentType];
+    const response = data[fieldName][documentType];
     const edges = page.filter ? response.edges.filter(page.filter) : response.edges;
 
     // Add last end cursor to all edges to enable pagination context when creating pages
@@ -274,7 +286,10 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
 
 exports.createResolvers = (
   { actions, cache, createNodeId, createResolvers, store, reporter }: any,
-  { sharpKeys = [/image|photo|picture/] }: PluginOptions
+  {
+    sharpKeys = defaultPluginOptions.sharpKeys,
+    typeName: pluginOptionsTypeName = defaultPluginOptions.typeName,
+  }: PluginOptions
 ) => {
   const { createNode } = actions;
 
@@ -290,7 +305,7 @@ exports.createResolvers = (
     for (const fieldName in typeFields) {
       const field = typeFields[fieldName];
       if (
-        field.type === typeMap.PRISMIC_Json &&
+        field.type === typeMap[`${pluginOptionsTypeName}_Json`] &&
         sharpKeys.some((re: RegExp | string) =>
           re instanceof RegExp ? re.test(fieldName) : re === fieldName
         )

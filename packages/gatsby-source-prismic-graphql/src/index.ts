@@ -8,6 +8,5 @@ export {
   getDocumentIndexFromCursor,
   registerLinkResolver,
   linkResolver,
-  fieldName,
-  typeName,
+  defaultPluginOptions,
 } from './utils';

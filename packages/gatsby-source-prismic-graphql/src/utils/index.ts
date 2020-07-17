@@ -13,9 +13,7 @@ interface IPrismicLinkArgs extends HttpOptions {
   useGETForQueries?: boolean;
 }
 
-// @todo should this be configurable?
-export const fieldName = 'prismic';
-export const typeName = 'PRISMIC';
+export { defaultPluginOptions } from './defaultPluginOptions';
 
 // keep link resolver function
 export let linkResolver: (doc: any) => string = () => '/';

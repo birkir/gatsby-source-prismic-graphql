@@ -69,6 +69,8 @@ yarn add gatsby-source-prismic-graphql
       /image|photo|picture/, // (default)
       'profilepic',
     ],
+    typeName: '...', // optional, default: PRISMIC
+    fieldName: '...', // optional, default: prismic
   }
 }
 ```
