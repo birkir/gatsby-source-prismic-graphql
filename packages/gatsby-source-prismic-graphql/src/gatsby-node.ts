@@ -217,7 +217,7 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
     const pageTypeFormatted = pageTypeUnderscored.charAt(0).toUpperCase() + pageTypeUnderscored.slice(1);
     // Prepare and execute query
     const documentType: string = `all${pageTypeFormatted}s`;
-    const sortType: string = `PRISMIC_Sort${pageTypeFormatted}y`;
+    const sortType: string = `PRISMIC_Sort${pageTypeFormatted}`;
     const extraPageFields = options.extraPageFields || '';
     const query: string = getDocumentsQuery({ documentType, sortType, extraPageFields });
     const { data, errors } = await graphql(query, {
