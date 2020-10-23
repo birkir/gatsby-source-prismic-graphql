@@ -249,7 +249,9 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
 
   async function createPagesForType(page: Page, lang?: string): Promise<string[]> {
     const edges = await getPrismicEdges(page, lang);
-    createDocumentPreviewPage(createPage, options, page);
+    if (options.previews) {
+      createDocumentPreviewPage(createPage, options, page);
+    }
     return createDocumentPages(createPage, edges, options, page);
   }
 
@@ -268,8 +270,10 @@ exports.createPages = async ({ graphql, actions: { createPage } }: any, options:
 
   // Run all pageCreators simultaneously
   const allPaths = flatten(await Promise.all(pageCreators));
-
-  createGeneralPreviewPage(createPage, allPaths, options);
+  
+  if (options.previews) {
+    createGeneralPreviewPage(createPage, allPaths, options);
+  }
 };
 
 exports.createResolvers = (
